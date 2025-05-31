@@ -4,9 +4,14 @@ interface Window {
 }
 
 interface FileSystemDirectoryHandle {
-    entries: () => Promise<{
-        kind: string
-        name: string
-        [Symbol.iterator]()
-    }>
+    entries: () => Promise<
+        Symbol.asyncIterator
+    >
+}
+
+enum BtnList {
+    Play = 'play',
+    Next = 'next',
+    Previous = 'Previous',
+    Voice = 'Voice'
 }

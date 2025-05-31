@@ -2,6 +2,7 @@
 
   import Header from './components/Header.vue';
   import HomeSide from './components/HomeSide.vue';
+  import Music from './components/Music.vue';
   import { useSettingStore } from './stores/setting';
   const themeStore = useSettingStore();
 </script>
@@ -14,7 +15,7 @@
       <Header></Header>
       <n-layout position="absolute" style="top:35px; " has-sider>
         <HomeSide></HomeSide>
-        <n-layout-content position="absolute" style="left:150px; " content-style="padding: 24px;">
+        <n-layout-content position="absolute" style="left:150px; bottom: 90px;" content-style="padding: 24px;">
           <RouterView v-slot="{ Component }">
             <KeepAlive include="MusicView">
               <component :is="Component" />
@@ -23,6 +24,7 @@
         </n-layout-content>
       </n-layout>
       <!-- <n-layout-footer></n-layout-footer> -->
+      <Music />
     </n-layout>
     <!-- </div> -->
 

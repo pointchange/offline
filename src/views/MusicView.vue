@@ -1,44 +1,34 @@
 <script lang="ts" setup>
-  import { reactive, ref } from 'vue';
-
-  const url = ref('');
-  const list = reactive<any[]>([]);
-  async function openDirectory() {
+  import { getFiles } from '@/utils/file/fileHandle';
+  import { TYPES } from '@/utils/music/const';
+  import { DeleteFileSuffix } from '@/utils/music/format';
+  import { useMusicStore } from '@/stores/music';
+  const musicStore = useMusicStore();
+  async function openDirectoryHandle() {
     try {
       const directory = await window.showDirectoryPicker();
-      console.log(directory)
-      const files = await directory.entries();
-      console.log(files);
-      for (const file of files) {
-        const f = await file[1].getFile()
-        list.push({
-          id: crypto.randomUUID(),
-          name: f.name,
-          stream: f,
-        });
+      const files = await getFiles(directory);
+      const songFiles = [];
+      for (let i = 0; i < files.length; i++) {
+        const item = files[i];
+        const bool = TYPES.some(v => new RegExp(v, 'ig').test(item[1].name)) && item[1].kind === 'file';
+        if (bool) {
+          songFiles.push(item[1]);
+        }
+      }
+      if (songFiles.length > 0) {
+        musicStore.list.push(...songFiles)
       }
     } catch (error) { }
-  }
-  function canplayHandle(e: Event) {
-    (e.target as HTMLAudioElement).play()
-  }
-  function playHandle(id: string) {
-    const audio = list.find(v => v.id === id);
-    url.value = URL.createObjectURL(audio.stream)
   }
 </script>
 <template>
   <div>
-    <audio class="audio" controls :src="url" @canplay="canplayHandle"></audio>
-    <n-button @click="openDirectory">打开文件夹</n-button>
-    <ul>
-      <li @click="playHandle(item.id)" v-for="item in list" :key="item.id">{{ item.name }}</li>
-    </ul>
+    <n-button @click="openDirectoryHandle">打开文件夹</n-button>
+    <n-list hoverable clickable>
+      <n-list-item @click="() => musicStore.playHandle(item.name)" v-for="item in musicStore.list" :key="item.name">
+        {{ DeleteFileSuffix(item.name) }}
+      </n-list-item>
+    </n-list>
   </div>
 </template>
-<style scoped>
-  .audio {
-    width: 100%;
-
-  }
-</style>
