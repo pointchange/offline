@@ -2,6 +2,8 @@
   import { routesTotal } from '@/router';
   import { useNavStore } from '@/stores/nav';
   import { useRouter } from 'vue-router';
+  import { NH1, NStatistic, NDivider, NCard } from 'naive-ui';
+
   const router = useRouter()
   const navStore = useNavStore()
   function navigateToMusic() {

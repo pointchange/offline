@@ -13,5 +13,6 @@ enum BtnList {
     Play = 'play',
     Next = 'next',
     Previous = 'Previous',
-    Voice = 'Voice'
+    Voice = 'Voice',
+    Order = "Order"
 }

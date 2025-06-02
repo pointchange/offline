@@ -1,21 +1,28 @@
 <script lang="ts" setup>
-    import { DeleteFileSuffix, getFileSuffix } from '@/utils/music/format';
+    import { NCard, NButton, NIcon, NSlider, NSpace, NText, } from 'naive-ui';
+    import { DeleteFileSuffix } from '@/utils/music/format';
     import {
-        Speaker220Regular, SpeakerMute20Regular, Play20Filled, Pause20Filled, Next20Filled, Previous20Filled, TextBulletListLtr20Filled, ArrowRepeatAll20Regular,
+        Speaker220Regular, SpeakerMute20Regular, Play20Filled, Pause20Filled, Next20Filled, Previous20Filled, ArrowRepeatAll20Regular,
         ArrowClockwise20Filled,
-        ArrowRepeatAll20Filled, ChevronUp20Filled, ChevronDown20Filled
+        ArrowRepeatAll20Filled, ChevronUp20Filled, ChevronDown20Filled,
+        FolderOpen20Regular,
     } from '@vicons/fluent'
     import { computed, reactive, ref, shallowRef, triggerRef, useTemplateRef, watch } from 'vue';
-    import Random from './icon/Random.vue';
-    import Reverse from './icon/Reverse.vue';
+    import Random from '../icon/Random.vue';
+    import Reverse from '../icon/Reverse.vue';
     import { useMusicStore } from '@/stores/music';
+    import { useSettingStore } from '@/stores/setting';
     const musicStore = useMusicStore();
+    const themeStore = useSettingStore();
+
     enum BtnList {
         Play = 'play',
         Next = 'next',
         Previous = 'Previous',
         Voice = 'Voice',
-        Order = 'Order'
+        Order = 'Order',
+        Fold = 'Fold',
+        List = 'List'
     }
     enum PlayMode {
         Order,
@@ -82,28 +89,28 @@
     function setNext() {
         isPlaying.value = false;
         const index = musicStore.list.findIndex(v => v.name === musicStore.musicMetadata.name);
-        let name = '';
+        let file: FileSystemFileHandle;
         if (index === 0) {
-            name = musicStore.list[total.value - 1].name
+            file = musicStore.list[total.value - 1]
         } else if (index === total.value - 1) {
-            name = musicStore.list[0].name
+            file = musicStore.list[0]
         } else {
-            name = musicStore.list[index + 1].name
+            file = musicStore.list[index + 1]
         }
-        musicStore.playHandle(name);
+        musicStore.playHandle(file);
     }
     function setPrevious() {
         isPlaying.value = false;
         const index = musicStore.list.findIndex(v => v.name === musicStore.musicMetadata.name);
-        let name = '';
+        let file: FileSystemFileHandle;
         if (index === 0) {
-            name = musicStore.list[total.value - 1].name
+            file = musicStore.list[total.value - 1]
         } else if (index === total.value - 1) {
-            name = musicStore.list[0].name
+            file = musicStore.list[0]
         } else {
-            name = musicStore.list[index - 1].name
+            file = musicStore.list[index - 1]
         }
-        musicStore.playHandle(name);
+        musicStore.playHandle(file);
     }
     function timeFormat(time: number) {
         function isUnitsDigit(n: number) {
@@ -151,8 +158,8 @@
     }
     function setRandom() {
         const index = Math.floor(Math.random() * total.value)
-        const name = musicStore.list[index].name;
-        musicStore.playHandle(name);
+        const file = musicStore.list[index];
+        musicStore.playHandle(file);
     }
     function endedHandle() {
         switch (music.order) {
@@ -192,12 +199,16 @@
         triggerRef(btnList);
     }
 
-
     const btnList = shallowRef([
         {
             name: BtnList.Voice,
             icon: Speaker220Regular,
             handle: setSound
+        },
+        {
+            name: BtnList.Fold,
+            icon: FolderOpen20Regular,
+            handle: () => musicStore.addList()
         },
         {
             name: BtnList.Order,
@@ -220,54 +231,74 @@
             handle: setPlay
         }
     ])
+    let firstGetTitle = false;
+    let title = '';
+    watch(() => musicStore.musicMetadata.name, () => {
+        if (!firstGetTitle) {
+            title = document.title
+            firstGetTitle = true;
+        }
+        document.title = name.value + ` ( ${title} )`;
+
+    })
+
 </script>
 <template>
-    <audio @ended="endedHandle" @timeupdate="timeupdateHandle" :muted="isMuted" ref="audioRef" @canplay="canplayHandle"
-        :src="musicStore.musicMetadata.url" @error="errorHandle"></audio>
-    <Teleport to="body">
-        <n-card class="music-card" size="small">
-            <div class="lock" @click="">
-                <n-button quaternary>
-                    <template #icon>
-                        <n-icon v-show="!musicStore.isShowMusicComponent" :component="ChevronUp20Filled"></n-icon>
-                        <n-icon v-show="musicStore.isShowMusicComponent" :component="ChevronDown20Filled"></n-icon>
-                    </template>
-                </n-button>
-            </div>
-            <template #header>
-                <n-slider @dragstart="isCurrentTimeChanging = false" @dragend="dragendHandle"
-                    @update:value="(value: number) => music.currentTime = value"
-                    :format-tooltip="(value: number) => timeFormat(value)" :value="music.currentTime" :min="0"
-                    :max="music.duration" :step="0.01" />
-            </template>
-            <n-space align="center" justify="space-between">
-                <n-text>{{ name }}</n-text>
-                <n-space align="center">
-                    <n-space>
-                        <n-text>{{ timeFormat(music.currentTime) }}</n-text>
-                        <n-text>/</n-text>
-                        <n-text>{{ duration }}</n-text>
+    <div class="music">
+        <audio @ended="endedHandle" @timeupdate="timeupdateHandle" :muted="isMuted" ref="audioRef"
+            @canplay="canplayHandle" :src="musicStore.musicMetadata.url" @error="errorHandle"></audio>
+        <Transition name="fade">
+            <n-card v-show="themeStore.musicSetting.showComponent" class="music-card" size="small">
+                <template #header>
+                    <n-slider @dragstart="isCurrentTimeChanging = false" @dragend="dragendHandle"
+                        @update:value="(value: number) => music.currentTime = value"
+                        :format-tooltip="(value: number) => timeFormat(value)" :value="music.currentTime" :min="0"
+                        :max="music.duration" :step="0.01" />
+                </template>
+                <n-space align="center" justify="space-between">
+                    <n-text>{{ name }}</n-text>
+                    <n-space align="center">
+                        <n-space>
+                            <n-text>{{ timeFormat(music.currentTime) }}</n-text>
+                            <n-text>/</n-text>
+                            <n-text>{{ duration }}</n-text>
+                        </n-space>
+                        <n-slider :format-tooltip="(value: number) => value * 100 + '%'" :min="0" :max="1"
+                            @update:value="updataVolumeHandle" class="music-voice" v-model:value="voice" :step="0.05"
+                            reverse />
+                        <n-button :disabled="!(musicStore.list.length > 0)" v-for="item in btnList" :key="item.name"
+                            @click="item.handle" quaternary circle>
+                            <template #icon>
+                                <n-icon :component="item.icon"></n-icon>
+                            </template>
+                        </n-button>
                     </n-space>
-                    <n-slider :min="0" :max="1" @update:value="updataVolumeHandle" class="music-voice"
-                        v-model:value="voice" :step="0.1" reverse />
-                    <n-button v-for="item in btnList" :key="item.name" @click="item.handle" quaternary circle>
-                        <template #icon>
-                            <n-icon :component="item.icon"></n-icon>
-                        </template>
-                    </n-button>
                 </n-space>
-            </n-space>
-        </n-card>
-    </Teleport>
+            </n-card>
+        </Transition>
+
+        <div class="lock" @click="themeStore.musicSetting.showComponent = !themeStore.musicSetting.showComponent"
+            :class="{
+                'lock-animation-order': themeStore.musicSetting.showComponent
+            }">
+            <n-button quaternary>
+                <template #icon>
+                    <n-icon v-show="!themeStore.musicSetting.showComponent" :component="ChevronUp20Filled"></n-icon>
+                    <n-icon v-show="themeStore.musicSetting.showComponent" :component="ChevronDown20Filled"></n-icon>
+                </template>
+            </n-button>
+        </div>
+    </div>
 </template>
 <style scoped>
     audio {
         display: none;
     }
 
-    .music-card {
+    .music {
         position: fixed;
         bottom: 0;
+        width: 100%;
     }
 
     .music-voice {
@@ -278,5 +309,31 @@
         position: absolute;
         top: -2rem;
         right: 1rem;
+        animation: lockAnimation 2s infinite linear;
+    }
+
+    .lock-animation-order {
+        animation-direction: reverse;
+    }
+
+    .fade-enter-from,
+    .fade-leave-to {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        transform: translateY(88px);
+    }
+
+    .fade-enter-to,
+    .fade-leave-from {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        transform: translateY(0);
+    }
+
+    .fade-leave-active,
+    .fade-enter-active {
+        transition: transform 0.5s ease;
     }
 </style>

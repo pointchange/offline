@@ -1,3 +1,7 @@
+<script setup lang="ts">
+    import { NIcon } from 'naive-ui';
+
+</script>
 <template>
     <n-icon size="18" :depth="2">
         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">

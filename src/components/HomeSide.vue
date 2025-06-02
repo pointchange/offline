@@ -1,7 +1,7 @@
 <script lang="ts" setup>
     import { h, ref, type Component } from 'vue';
     import { Home20Regular, MusicNote120Regular } from "@vicons/fluent"
-    import { NIcon } from 'naive-ui';
+    import { NIcon, NLayoutSider, NMenu } from 'naive-ui';
     import { RouterLink } from 'vue-router';
     import { useNavStore } from '@/stores/nav';
     const navStore = useNavStore()

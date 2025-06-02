@@ -1,11 +1,5 @@
-async function openDirectory() {
-    try {
-        const directory = await window.showDirectoryPicker();
-        return await directory.entries();
-    } catch (error) {
-        return null
-    }
-}
+import { TYPES } from "../music/const";
+
 async function getFiles(directory: FileSystemDirectoryHandle
 ) {
     const list = [];
@@ -14,24 +8,28 @@ async function getFiles(directory: FileSystemDirectoryHandle
         list.push(item);
     }
     return list;
-    // const fileArr = [];
-    // const directoryArr = []
-    // const files = await directory.entries();
-    // if (!files) return;
-    // for await (const item of files) {
-    //     if (item[1].kind === 'file') {
-    //         const file = await item[1].getFile()
-    //         fileArr.push(file);
-    //     } else {
-    //         directoryArr.push(item[1])
-    //     }
-    // }
-    // return {
-    //     files: fileArr,
-    //     directory: directoryArr
-    // };
+}
+
+async function openDirectory() {
+    try {
+        const directory = await window.showDirectoryPicker();
+        const files = await getFiles(directory);
+        const songFiles = [];
+        for (let i = 0; i < files.length; i++) {
+            const item = files[i];
+            const bool = TYPES.some(v => new RegExp(v, 'ig').test(item[1].name)) && item[1].kind === 'file';
+            if (bool) {
+                songFiles.push(item[1]);
+            }
+        }
+        if (songFiles.length > 0) {
+            return songFiles
+        } else {
+            return []
+        }
+    } catch (error) { return [] }
 }
 
 export {
-    openDirectory, getFiles
+    openDirectory, getFiles,
 }

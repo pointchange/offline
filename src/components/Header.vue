@@ -1,8 +1,10 @@
 <script lang="ts" setup>
+    import { NLayoutHeader, NFlex, NButton, NIcon, NPopover } from 'naive-ui';
     import { useSettingStore } from '@/stores/setting';
     import Github from './icon/Github.vue';
     import { Settings20Regular } from "@vicons/fluent"
     const themeStore = useSettingStore();
+
 </script>
 <template>
     <n-layout-header class="header" position="absolute" bordered>
@@ -35,8 +37,3 @@
         </n-flex>
     </n-layout-header>
 </template>
-<style scoped>
-    /* .header {
-        height: 35px
-    } */
-</style>
