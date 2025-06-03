@@ -7,13 +7,14 @@
         ArrowRepeatAll20Filled, ChevronUp20Filled, ChevronDown20Filled,
         FolderOpen20Regular,
     } from '@vicons/fluent'
-    import { computed, reactive, ref, shallowRef, triggerRef, useTemplateRef, watch } from 'vue';
+    import { computed, onMounted, reactive, ref, shallowRef, triggerRef, useTemplateRef, watch } from 'vue';
     import Random from '../icon/Random.vue';
     import Reverse from '../icon/Reverse.vue';
     import { useMusicStore } from '@/stores/music';
     import { useSettingStore } from '@/stores/setting';
+    import { AnimationTime } from '@/utils/app/const';
     const musicStore = useMusicStore();
-    const themeStore = useSettingStore();
+    const settingStore = useSettingStore();
 
     enum BtnList {
         Play = 'play',
@@ -239,7 +240,17 @@
             firstGetTitle = true;
         }
         document.title = name.value + ` ( ${title} )`;
+    })
+    watch(() => settingStore.musicSetting.destoryComponent, (value) => {
+        if (value) {
+            if (!audioRef.value) return;
+            audioRef.value.onended = null;
+            audioRef.value.ontimeupdate = null;
+            audioRef.value.oncanplay = null;
+            audioRef.value.onerror = null;
 
+            musicStore.$reset();
+        }
     })
 
 </script>
@@ -248,7 +259,7 @@
         <audio @ended="endedHandle" @timeupdate="timeupdateHandle" :muted="isMuted" ref="audioRef"
             @canplay="canplayHandle" :src="musicStore.musicMetadata.url" @error="errorHandle"></audio>
         <Transition name="fade">
-            <n-card v-show="themeStore.musicSetting.showComponent" class="music-card" size="small">
+            <n-card v-show="settingStore.musicSetting.showComponent" class="music-card" size="small">
                 <template #header>
                     <n-slider @dragstart="isCurrentTimeChanging = false" @dragend="dragendHandle"
                         @update:value="(value: number) => music.currentTime = value"
@@ -277,14 +288,14 @@
             </n-card>
         </Transition>
 
-        <div class="lock" @click="themeStore.musicSetting.showComponent = !themeStore.musicSetting.showComponent"
-            :class="{
-                'lock-animation-order': themeStore.musicSetting.showComponent
+        <div v-if="settingStore.musicSetting.showMusicBtn" class="lock"
+            @click="settingStore.musicSetting.showComponent = !settingStore.musicSetting.showComponent" :class="{
+                'lock-animation-order': settingStore.musicSetting.showComponent
             }">
             <n-button quaternary>
                 <template #icon>
-                    <n-icon v-show="!themeStore.musicSetting.showComponent" :component="ChevronUp20Filled"></n-icon>
-                    <n-icon v-show="themeStore.musicSetting.showComponent" :component="ChevronDown20Filled"></n-icon>
+                    <n-icon v-show="!settingStore.musicSetting.showComponent" :component="ChevronUp20Filled"></n-icon>
+                    <n-icon v-show="settingStore.musicSetting.showComponent" :component="ChevronDown20Filled"></n-icon>
                 </template>
             </n-button>
         </div>
@@ -334,6 +345,6 @@
 
     .fade-leave-active,
     .fade-enter-active {
-        transition: transform 0.5s ease;
+        transition: transform v-bind('AnimationTime') ease;
     }
 </style>

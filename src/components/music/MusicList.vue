@@ -2,7 +2,7 @@
     import { NEl, useThemeVars } from 'naive-ui';
     import MusicListItem from './MusicListItem.vue';
     import { useMusicStore } from '@/stores/music';
-    import { ref, watch } from 'vue';
+    import { onMounted, ref, watch } from 'vue';
     import { useSettingStore } from '@/stores/setting';
     const { value: { primaryColor } } = useThemeVars();
 
@@ -12,6 +12,9 @@
         rgba.value = settingStore.setRgbColor(primaryColor, 0.2);
     }, { immediate: true })
     const musicStore = useMusicStore();
+    onMounted(() => {
+        settingStore.musicSetting.destoryComponent = false;
+    })
 </script>
 <template>
     <NEl tag="ul" class="ul" :style="{

@@ -9,6 +9,12 @@ interface FileSystemDirectoryHandle {
     >
 }
 
+interface ThemeZhCN {
+    'null': '白天'
+    'dark': '黑夜'
+    'followSystem': '跟随系统'
+}
+
 enum BtnList {
     Play = 'play',
     Next = 'next',

@@ -1,18 +1,24 @@
-import { darkTheme } from 'naive-ui';
+import { LIGHT, DARK, LIGHTZHCN, DARKZHCN } from '@/utils/setting/const';
+import { darkTheme, type GlobalThemeOverrides } from 'naive-ui';
 import { defineStore } from 'pinia'
 
 export const useSettingStore = defineStore('setting', {
   state: () => ({
+    themeZhCN: LIGHT,
     isDarktheme: false,
+    isFollowSystem: false,
+    color: '#18a058',
     isMusicKeepAlive: true,
     musicSetting: {
       destoryComponent: false,
-      showComponent: false
-    }
+      showComponent: false,
+      showMusicBtn: true,
+    },
+    themeOverrides: {} as GlobalThemeOverrides
   }),
   getters: {
     themeText(state) {
-      return state.isDarktheme ? '白天' : '黑夜';
+      return state.isDarktheme ? LIGHTZHCN : DARKZHCN;
     },
     theme(state) {
       return state.isDarktheme ? darkTheme : null;
@@ -21,6 +27,7 @@ export const useSettingStore = defineStore('setting', {
   actions: {
     setTheme() {
       this.isDarktheme = !this.isDarktheme;
+      this.themeZhCN = this.isDarktheme ? DARK : LIGHT
     },
     setRgbColor(color: string, transparency = 1) {
       const num = color.slice(1).toUpperCase();

@@ -9,7 +9,7 @@
   import MusicList from '@/components/music/MusicList.vue';
   import { useSettingStore } from '@/stores/setting';
   const musicStore = useMusicStore();
-  const themeStore = useSettingStore();
+  const settingStore = useSettingStore();
   const musicListRef = useTemplateRef('musicListRef');
   const nscrollbarRef = useTemplateRef('nscrollbarRef')
   const nLayoutContentRef = useTemplateRef('nLayoutContentRef')
@@ -55,7 +55,7 @@
 
   ]
   onMounted(() => {
-    themeStore.musicSetting.showComponent = true;
+    settingStore.musicSetting.showComponent = true;
   })
 </script>
 <template>
@@ -70,14 +70,12 @@
             </template>
           </n-button>
         </n-space>
-        <n-layout-content ref="nLayoutContentRef" position="absolute"
-          :style="{ top: themeStore.musicSetting.showComponent ? '78px' : 0 }">
+        <n-layout-content ref="nLayoutContentRef" position="absolute" style="top: 78px ">
           <n-scrollbar ref="nscrollbarRef">
             <MusicList ref="musicListRef"></MusicList>
           </n-scrollbar>
         </n-layout-content>
       </n-layout-header>
-
     </n-layout>
 
     <n-empty v-else description="你什么也找不到">

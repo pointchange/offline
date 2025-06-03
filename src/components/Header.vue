@@ -1,10 +1,25 @@
 <script lang="ts" setup>
-    import { NLayoutHeader, NFlex, NButton, NIcon, NPopover } from 'naive-ui';
+    import { NLayoutHeader, NFlex, NButton, NIcon, NPopover, useOsTheme } from 'naive-ui';
     import { useSettingStore } from '@/stores/setting';
     import Github from './icon/Github.vue';
     import { Settings20Regular } from "@vicons/fluent"
-    const themeStore = useSettingStore();
-
+    import { watch } from 'vue';
+    import { DARK } from '@/utils/setting/const';
+    import { useRouter } from 'vue-router';
+    import { useNavStore } from '@/stores/nav';
+    const router = useRouter();
+    const navStore = useNavStore();
+    const settingStore = useSettingStore();
+    const osTheme = useOsTheme()
+    watch([() => settingStore.isFollowSystem, osTheme], ([v1, v2]) => {
+        if (v1) {
+            settingStore.isDarktheme = v2 === DARK;
+        }
+    })
+    function toSetting() {
+        navStore.nav = 'setting';
+        router.push('/setting');
+    }
 </script>
 <template>
     <n-layout-header class="header" position="absolute" bordered>
@@ -18,12 +33,12 @@
                 <span>pointchange</span>
             </n-button>
             <n-flex align="center" justify="space-between">
-                <n-button @click="() => themeStore.setTheme()" quaternary>
-                    {{ themeStore.themeText }}
+                <n-button @click="() => settingStore.setTheme()" quaternary>
+                    {{ settingStore.themeText }}
                 </n-button>
                 <n-popover trigger="hover">
                     <template #trigger>
-                        <n-button quaternary>
+                        <n-button quaternary @click="toSetting">
                             <template #icon>
                                 <n-icon>
                                     <Settings20Regular />

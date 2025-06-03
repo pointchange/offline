@@ -14,6 +14,14 @@ const routes = [
     },
     component: () => import('../views/MusicView.vue'),
   },
+  {
+    path: '/setting',
+    name: 'setting',
+    meta: {
+      keepAlive: true,
+    },
+    component: () => import('../views/SettingView.vue'),
+  },
 ];
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,7 +29,7 @@ const router = createRouter({
 })
 
 export default router
-const routesTotal = routes.length - 1;
+const routesTotal = routes.length - 2;
 export {
   routesTotal
 }
