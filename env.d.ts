@@ -22,3 +22,5 @@ enum BtnList {
     Voice = 'Voice',
     Order = "Order"
 }
+
+type F = FileSystemFileHandle | File

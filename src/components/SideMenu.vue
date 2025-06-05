@@ -5,13 +5,15 @@
     import { RouterLink } from 'vue-router';
     import { useNavStore } from '@/stores/nav';
     import { useSettingStore } from '@/stores/setting';
+    import { useMusicStore } from '@/stores/music';
     const navStore = useNavStore();
     const settingStore = useSettingStore();
+    const musicStore = useMusicStore();
     function renderIcon(icon: Component) {
         return () => h(NIcon, null, { default: () => h(icon) })
     }
     function renderBadge() {
-        return () => h(NBadge, { value: "live" })
+        return () => h(NBadge, { value: "live", })
     }
     interface MenuOptions {
         label: () => VNode<RendererNode, RendererElement, { [key: string]: any; }>
@@ -48,7 +50,7 @@
                 ),
             key: 'music',
             icon: renderIcon(MusicNote120Regular),
-            extra: renderBadge(),
+            extra: undefined,
         },
         {
             label: () =>
@@ -66,13 +68,15 @@
             extra: undefined,
         },
     ]);
-    watch(() => settingStore.musicSetting.destoryComponent, (value) => {
+    watch([() => settingStore.musicSetting.destoryComponent, () => musicStore.total], ([value1, value2]) => {
         const item = menuOptions.value.find(item => item.key === 'music')
         if (item) {
-            if (value) {
+            if (value1) {
                 item.extra = undefined;
             } else {
-                item.extra = renderBadge();
+                if (value2 > 0) {
+                    item.extra = renderBadge();
+                }
             }
         }
     })

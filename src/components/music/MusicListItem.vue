@@ -3,7 +3,7 @@
     import { useMusicStore } from '@/stores/music';
     import { DeleteFileSuffix } from '@/utils/music/format';
     interface Item {
-        item: FileSystemFileHandle
+        item: F
     }
     defineProps<Item>()
     const musicStore = useMusicStore();

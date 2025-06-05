@@ -1,4 +1,5 @@
-import { TYPES } from "../music/const";
+import pinia from "@/stores";
+import { useMusicStore } from "@/stores/music";
 
 async function getFiles(directory: FileSystemDirectoryHandle
 ) {
@@ -11,23 +12,21 @@ async function getFiles(directory: FileSystemDirectoryHandle
 }
 
 async function openDirectory() {
+    const musicStore = useMusicStore(pinia);
+    const songFiles: FileSystemFileHandle[] = [];
     try {
         const directory = await window.showDirectoryPicker();
         const files = await getFiles(directory);
-        const songFiles = [];
         for (let i = 0; i < files.length; i++) {
             const item = files[i];
-            const bool = TYPES.some(v => new RegExp(v, 'ig').test(item[1].name)) && item[1].kind === 'file';
+            const bool = musicStore.encode.some(v => new RegExp(v, 'ig').test(item[1].name)) && item[1].kind === 'file';
             if (bool) {
                 songFiles.push(item[1]);
             }
         }
-        if (songFiles.length > 0) {
-            return songFiles
-        } else {
-            return []
-        }
-    } catch (error) { return [] }
+        return songFiles
+
+    } catch (error) { return songFiles }
 }
 
 export {

@@ -7,7 +7,7 @@
         ArrowRepeatAll20Filled, ChevronUp20Filled, ChevronDown20Filled,
         FolderOpen20Regular,
     } from '@vicons/fluent'
-    import { computed, onMounted, reactive, ref, shallowRef, triggerRef, useTemplateRef, watch } from 'vue';
+    import { computed, reactive, ref, shallowRef, triggerRef, useTemplateRef, watch } from 'vue';
     import Random from '../icon/Random.vue';
     import Reverse from '../icon/Reverse.vue';
     import { useMusicStore } from '@/stores/music';
@@ -90,7 +90,7 @@
     function setNext() {
         isPlaying.value = false;
         const index = musicStore.list.findIndex(v => v.name === musicStore.musicMetadata.name);
-        let file: FileSystemFileHandle;
+        let file: F;
         if (index === 0) {
             file = musicStore.list[total.value - 1]
         } else if (index === total.value - 1) {
@@ -103,7 +103,7 @@
     function setPrevious() {
         isPlaying.value = false;
         const index = musicStore.list.findIndex(v => v.name === musicStore.musicMetadata.name);
-        let file: FileSystemFileHandle;
+        let file: F;
         if (index === 0) {
             file = musicStore.list[total.value - 1]
         } else if (index === total.value - 1) {
