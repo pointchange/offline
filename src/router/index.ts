@@ -1,35 +1,28 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import HomeView from '../views/HomeView.vue';
 const routes = [
-  {
-    path: '/',
-    name: 'home',
-    component: HomeView,
-  },
-  {
-    path: '/music',
-    name: 'music',
-    meta: {
-      keepAlive: true,
+    {
+        path: '/',
+        name: 'home',
+        component: HomeView,
     },
-    component: () => import('../views/MusicView.vue'),
-  },
-  {
-    path: '/setting',
-    name: 'setting',
-    meta: {
-      keepAlive: true,
+    {
+        path: '/music',
+        name: 'music',
+        meta: {
+            keepAlive: true,
+        },
+        component: () => import('../views/MusicView.vue'),
     },
-    component: () => import('../views/SettingView.vue'),
-  },
+    {
+        path: '/setting',
+        name: 'setting',
+        component: () => import('../views/SettingView.vue'),
+    },
 ];
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes
 })
 
-export default router
-const routesTotal = routes.length - 2;
-export {
-  routesTotal
-}
+export default router;

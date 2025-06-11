@@ -1,0 +1,41 @@
+.df-c-c {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.df-sb-c {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.space-tb {
+    margin: 1rem 0;
+}
+
+.space-rl {
+    margin: 0 1rem;
+}
+
+.dg-c {
+    display: grid;
+    grid-template-columns: auto 1fr;
+}
+
+.dg-r {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+}
+
+.m-l-0 {
+    margin-left: 0.5rem;
+}
+
+.p-all-0 {
+    padding: 0.5rem;
+}
+
+.header {
+    padding: 0.4rem;
+}

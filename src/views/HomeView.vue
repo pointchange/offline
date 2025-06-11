@@ -1,36 +1,46 @@
 <script lang="ts" setup>
-  import { routesTotal } from '@/router';
-  import { useNavStore } from '@/stores/nav';
-  import { useRouter } from 'vue-router';
-  import { NH1, NStatistic, NDivider, NCard } from 'naive-ui';
+    import { useRouter } from 'vue-router';
 
-  const router = useRouter()
-  const navStore = useNavStore()
-  function navigateToMusic() {
-    navStore.nav = 'music';
-    router.push('/music');
-  }
-
+    const router = useRouter();
+    function toView() {
+        router.push('music');
+    }
 </script>
 <template>
-  <div>
-    <n-h1>Offline……</n-h1>
-    <n-statistic label="离线组件">
-      {{ routesTotal }}
-    </n-statistic>
-    <n-divider />
-    <n-card title="音乐" @click="navigateToMusic">
-      <audio class="audio" controls></audio>
-    </n-card>
-  </div>
+    <div class="home-view">
+        <header>Offline……</header>
+        <hr>
+        <div class="card">
+            <div @click="toView" class="card-item">
+                <span>音乐</span>
+                <audio controls></audio>
+            </div>
+        </div>
+    </div>
 </template>
 <style scoped>
-  .n-card {
-    max-width: 350px;
-  }
+    .home-view {
+        padding: 0 0.4rem;
+    }
 
-  .audio {
-    pointer-events: none;
-    color: var(--n-text-color);
-  }
+    header {
+        font-size: 2rem;
+    }
+
+    .card-item {
+        padding: 1rem 0;
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+        gap: 0.4rem;
+        border: 1px solid var(--pc-border-color);
+    }
+
+    .card-item span {
+        margin-left: 1rem;
+    }
+
+    audio {
+        pointer-events: none;
+    }
 </style>

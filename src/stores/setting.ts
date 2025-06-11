@@ -1,5 +1,10 @@
-import { LIGHT, DARK, LIGHTZHCN, DARKZHCN } from '@/utils/setting/const';
-import { darkTheme, type GlobalThemeOverrides } from 'naive-ui';
+const DARKZHCN = '黑夜';
+const LIGHTZHCN = '白天';
+const FOLLOWSYSTEMZHCN = '跟随系统'
+
+const DARK = 'dark';
+const LIGHT = 'null';
+const FOLLOWSYSTEM = 'followSystem'
 import { defineStore } from 'pinia'
 
 export const useSettingStore = defineStore('setting', {
@@ -14,14 +19,14 @@ export const useSettingStore = defineStore('setting', {
       showComponent: false,
       showMusicBtn: true,
     },
-    themeOverrides: {} as GlobalThemeOverrides
+    themeOverrides: {}
   }),
   getters: {
     themeText(state) {
       return state.isDarktheme ? LIGHTZHCN : DARKZHCN;
     },
     theme(state) {
-      return state.isDarktheme ? darkTheme : null;
+      return null;
     }
   },
   actions: {

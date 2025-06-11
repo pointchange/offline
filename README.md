@@ -7,7 +7,6 @@
 | 依赖 | 依赖介绍 |
 | :----: | :----: |
 | [vue](https://cn.vuejs.org/) | 数据驱动视图 |
-| [naive ui](https://ui.naiveadmin.com/zh-CN/os-theme) | 快速构建页面 |
 | [pinia](https://pinia.vuejs.org/zh/) | 状态抽取、集中管理 |
 
 ## 音乐播放器 （待完成……）

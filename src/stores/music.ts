@@ -1,8 +1,20 @@
-import { openDirectory } from '@/utils/file/fileHandle';
-import { TYPES } from '@/utils/music/const';
 import { defineStore } from 'pinia'
+enum PlayMode {
+    Order,
+    Random,
+    Repeat,
+    Reversed
+}
+
 export const useMusicStore = defineStore('music', {
     state: () => ({
+        music: {
+            order: PlayMode.Order,
+            currentTime: 0,
+            duration: 0,
+            volumn: 1,
+
+        },
         musicMetadata: {
             url: '',
             name: '',
@@ -13,7 +25,8 @@ export const useMusicStore = defineStore('music', {
         keyword: '',
         currentIndex: 0,
         oldIndex: 0,
-        encode: TYPES
+        encode: ['mp3', 'mp4a', 'flac', 'ogg',],
+        isPlaying: false
     }),
     getters: {
         filterList(state) {
@@ -30,6 +43,26 @@ export const useMusicStore = defineStore('music', {
     },
 
     actions: {
+        async openDirectory() {
+            const songFiles: FileSystemFileHandle[] = [];
+            try {
+                const directory = await window.showDirectoryPicker();
+                const list = [];
+                const files = await directory.entries();
+                for await (const item of files) {
+                    list.push(item);
+                }
+                for (let i = 0; i < list.length; i++) {
+                    const item = list[i];
+                    const bool = this.encode.some(v => new RegExp(v, 'ig').test(item[1].name)) && item[1].kind === 'file';
+                    if (bool) {
+                        songFiles.push(item[1]);
+                    }
+                }
+                return songFiles
+
+            } catch (error) { return songFiles }
+        },
         async playHandle(file: F) {
             if (file instanceof FileSystemFileHandle) {
                 this.musicMetadata.url = URL.createObjectURL(await file.getFile());
@@ -48,12 +81,70 @@ export const useMusicStore = defineStore('music', {
             this.list.unshift(...list)
         },
         async addList() {
-            const list = await openDirectory();
+            const list = await this.openDirectory();
             const len = list.length;
             if (len > 0) {
                 this.add(list);
                 this.currentIndex += len;
             }
-        }
+        },
+        setRandom() {
+            const index = Math.floor(Math.random() * this.total)
+            const file = this.list[index];
+            this.playHandle(file);
+        },
+        setNext() {
+            this.isPlaying = false;
+            const index = this.list.findIndex(v => v.name === this.musicMetadata.name);
+            let file: F;
+            if (index === this.total - 1) {
+                file = this.list[0]
+            } else {
+                file = this.list[index + 1]
+            }
+            this.playHandle(file);
+        },
+        setPrevious() {
+            this.isPlaying = false;
+            const index = this.list.findIndex(v => v.name === this.musicMetadata.name);
+            let file: F;
+            if (index === 0) {
+                file = this.list[this.total - 1];
+            } else {
+                file = this.list[index - 1]
+            }
+            this.playHandle(file);
+        },
+        setRepeat(audio: HTMLAudioElement) {
+            if (!audio) return;
+            audio.currentTime = 0;
+            audio.play();
+        },
+        endedHandle(audio: HTMLAudioElement) {
+            switch (this.music.order) {
+                case PlayMode.Random:
+                    this.setRandom()
+                    break;
+                case PlayMode.Repeat:
+                    this.setRepeat(audio)
+                    break;
+                case PlayMode.Reversed:
+                    this.setPrevious()
+                    break;
+                default:
+                    this.setNext()
+                    break;
+            }
+        },
+        setPlayOrder() {
+            const total = Object.keys(PlayMode).length / 2;
+            this.music.order++;
+            if (this.music.order > total - 1) {
+                this.music.order = 0;
+            }
+        },
+        setPlaybackRate() {
+
+        },
     },
 })
