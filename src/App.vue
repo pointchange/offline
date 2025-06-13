@@ -1,23 +1,27 @@
 <script lang="ts" setup>
+  import { onMounted } from 'vue';
   import Header from './components/Header.vue';
-  import Music from './components/music/Music.vue';
+  // import Music from './components/music/Music.vue';
   import Nav from './components/Nav.vue';
-
+  import { useSettingStore } from './stores/setting';
+  import { useMusicStore } from './stores/music';
+  const setting = useSettingStore();
   // function keepAliveHandle() {
   //   return settingStore.musicSetting.destoryComponent ? '' : 'MusicView'
   // }
+  const musicStore = useMusicStore();
+  onMounted(() => {
+    musicStore.init();
+    setting.init();
+  })
 </script>
 <template>
-  <div class="home dg-r">
+  <div class="home ">
     <header class="df-sb-c header">
       <Header></Header>
     </header>
-    <main class="dg-c">
-      <aside class="border-r aside">
-        <nav>
-          <Nav></Nav>
-        </nav>
-      </aside>
+    <main class="main">
+      <Nav></Nav>
       <article>
         <section class="section">
           <RouterView v-slot="{ Component }">
@@ -28,7 +32,7 @@
         </section>
       </article>
     </main>
-    <Music></Music>
+    <!-- <Music></Music> -->
   </div>
 </template>
 <style scoped>
@@ -36,20 +40,20 @@
     height: 100%;
   }
 
-  .header {
-    position: sticky;
-    top: 0;
+  .main {
+    display: flex;
+  }
 
+  article {
+    flex: 1;
+  }
+
+  .header {
     border-bottom: 1px solid var(--pc-border-color);
   }
 
-  .aside {
-    height: 100%;
-  }
-
   .section {
-    height: calc(100vh - 44px);
-    overflow-y: scroll;
+    height: calc(100vh - 54px);
   }
 
 

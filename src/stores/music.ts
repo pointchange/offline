@@ -8,17 +8,20 @@ enum PlayMode {
 
 export const useMusicStore = defineStore('music', {
     state: () => ({
+        audio: new Audio(),
+        url: '',
         music: {
             order: PlayMode.Order,
             currentTime: 0,
             duration: 0,
             volumn: 1,
-
+            playing: false,
+            name: ''
         },
-        musicMetadata: {
-            url: '',
-            name: '',
-        },
+        // music: {
+        //     url: '',
+        //     name: '',
+        // },
         isMuted: false,
         list: [] as F[],
         isShowMusicComponent: false,
@@ -39,10 +42,35 @@ export const useMusicStore = defineStore('music', {
         },
         total(state) {
             return state.list.length;
+        },
+        encodeTotal(state) {
+            return state.encode.length;
         }
     },
 
     actions: {
+        init() {
+            this.audio.onended = this.endedHandle;
+            this.audio.ontimeupdate = (e: Event) => {
+                const audio = e.target as HTMLAudioElement;
+                this.music.currentTime = audio.currentTime;
+            }
+            this.audio.oncanplay = (e: Event) => {
+                const audio = e.target as HTMLAudioElement;
+                audio.play();
+                this.music.duration = audio.duration;
+                this.music.playing = true;
+            }
+            this.audio.onerror = (e) => {
+                console.log(e);
+            }
+        },
+        destory() {
+            this.audio.onended = null;
+            this.audio.ontimeupdate = null;
+            this.audio.oncanplay = null;
+            this.audio.onerror = null;
+        },
         async openDirectory() {
             const songFiles: FileSystemFileHandle[] = [];
             try {
@@ -65,11 +93,11 @@ export const useMusicStore = defineStore('music', {
         },
         async playHandle(file: F) {
             if (file instanceof FileSystemFileHandle) {
-                this.musicMetadata.url = URL.createObjectURL(await file.getFile());
+                this.audio.src = URL.createObjectURL(await file.getFile());
             } else {
-                this.musicMetadata.url = URL.createObjectURL(file);
+                this.audio.src = URL.createObjectURL(file);
             }
-            this.musicMetadata.name = file.name;
+            this.music.name = file.name;
             const name = file.name;
             this.oldIndex = this.currentIndex;
             this.currentIndex = this.list.findIndex(v => v.name === name);
@@ -95,7 +123,7 @@ export const useMusicStore = defineStore('music', {
         },
         setNext() {
             this.isPlaying = false;
-            const index = this.list.findIndex(v => v.name === this.musicMetadata.name);
+            const index = this.list.findIndex(v => v.name === this.music.name);
             let file: F;
             if (index === this.total - 1) {
                 file = this.list[0]
@@ -106,7 +134,7 @@ export const useMusicStore = defineStore('music', {
         },
         setPrevious() {
             this.isPlaying = false;
-            const index = this.list.findIndex(v => v.name === this.musicMetadata.name);
+            const index = this.list.findIndex(v => v.name === this.music.name);
             let file: F;
             if (index === 0) {
                 file = this.list[this.total - 1];
@@ -115,18 +143,17 @@ export const useMusicStore = defineStore('music', {
             }
             this.playHandle(file);
         },
-        setRepeat(audio: HTMLAudioElement) {
-            if (!audio) return;
-            audio.currentTime = 0;
-            audio.play();
+        setRepeat() {
+            this.audio.currentTime = 0;
+            this.audio.play();
         },
-        endedHandle(audio: HTMLAudioElement) {
+        endedHandle() {
             switch (this.music.order) {
                 case PlayMode.Random:
                     this.setRandom()
                     break;
                 case PlayMode.Repeat:
-                    this.setRepeat(audio)
+                    this.setRepeat()
                     break;
                 case PlayMode.Reversed:
                     this.setPrevious()
@@ -143,8 +170,22 @@ export const useMusicStore = defineStore('music', {
                 this.music.order = 0;
             }
         },
-        setPlaybackRate() {
-
+        progressChange(value: number) {
+            this.audio.currentTime = value
         },
+        volumnChange(value: number) {
+            this.audio.volume = value;
+            this.isMuted = value === 0;
+        },
+        DeleteFileSuffix(name: string) {
+            const nameArr = name.split('.');
+            const len = nameArr.length - 1;
+            return name.replace('.' + nameArr[len], '');
+        },
+        getFileSuffix(name: string) {
+            const nameArr = name.split('.');
+            const len = nameArr.length - 1;
+            return nameArr[len];
+        }
     },
 })

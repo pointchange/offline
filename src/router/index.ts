@@ -24,5 +24,7 @@ const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes
 })
-
+const routesTotal = routes.length - 2;
 export default router;
+
+export { routesTotal }

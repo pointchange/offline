@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+    import { routesTotal } from '@/router';
     import { useRouter } from 'vue-router';
 
     const router = useRouter();
@@ -9,7 +10,11 @@
 <template>
     <div class="home-view">
         <header>Offline……</header>
-        <hr>
+        <div class="count">
+            <p>统计组件</p>
+            <h1 class="h1">{{ routesTotal }}</h1>
+        </div>
+        <div class="border-b"></div>
         <div class="card">
             <div @click="toView" class="card-item">
                 <span>音乐</span>
@@ -20,7 +25,17 @@
 </template>
 <style scoped>
     .home-view {
-        padding: 0 0.4rem;
+        padding: 0 var(--pc-gap-small);
+        display: grid;
+        gap: var(--pc-gap-small);
+    }
+
+    .count {
+        border-bottom: 1px solid var(--pc-border-color);
+    }
+
+    .h1 {
+        font-size: 1.5rem;
     }
 
     header {
@@ -28,16 +43,16 @@
     }
 
     .card-item {
-        padding: 1rem 0;
+        padding: var(--pc-gap-normal) 0;
         display: flex;
         flex-direction: column;
         width: 300px;
-        gap: 0.4rem;
+        gap: var(--pc-gap-small);
         border: 1px solid var(--pc-border-color);
     }
 
     .card-item span {
-        margin-left: 1rem;
+        margin-left: var(--pc-gap-normal);
     }
 
     audio {

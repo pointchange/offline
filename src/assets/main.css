@@ -1,6 +1,65 @@
 html,
 body,
 #app {
-    width: 100%;
+    width: 100vw;
     height: 100vh;
+}
+
+body {
+    background-color: var(--pc-theme-color);
+    color: var(--pc-theme-fs-color);
+}
+
+.df-sb-c {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.df-c-c {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.list a {
+    display: block;
+    padding: var(--pc-gap-normal);
+}
+
+.list a:hover {
+    background-color: var(--pc-hover-color);
+}
+
+.list .list-item {
+    padding: var(--pc-gap-normal);
+    border-bottom: 1px solid var(--pc-border-color);
+}
+
+.button {
+    padding: var(--pc-gap-medium);
+    border-radius: var(--pc-gap);
+}
+
+.button:hover {
+    background-color: var(--pc-hover-color);
+}
+
+@media (prefers-color-scheme: light) {
+    html {
+        --pc-theme-color: #fff;
+        --pc-theme-fs-color: #000;
+        --pc-hover-color: #eee;
+        --pc-active-color: #eee;
+        --pc-border-color: #eee;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    html {
+        --pc-theme-color: #111;
+        --pc-theme-fs-color: #eee;
+        --pc-hover-color: #555;
+        --pc-border-color: #555;
+    }
 }

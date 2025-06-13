@@ -3,23 +3,19 @@ const LIGHTZHCN = '白天';
 const FOLLOWSYSTEMZHCN = '跟随系统'
 
 const DARK = 'dark';
-const LIGHT = 'null';
+const LIGHT = 'light';
 const FOLLOWSYSTEM = 'followSystem'
 import { defineStore } from 'pinia'
-
+export {
+  DARKZHCN,
+  LIGHTZHCN, FOLLOWSYSTEMZHCN, DARK, LIGHT, FOLLOWSYSTEM,
+}
 export const useSettingStore = defineStore('setting', {
   state: () => ({
-    themeZhCN: LIGHT,
+    themeValue: LIGHT,
     isDarktheme: false,
     isFollowSystem: false,
-    color: '#18a058',
-    isMusicKeepAlive: true,
-    musicSetting: {
-      destoryComponent: false,
-      showComponent: false,
-      showMusicBtn: true,
-    },
-    themeOverrides: {}
+    foldNav: true,
   }),
   getters: {
     themeText(state) {
@@ -30,9 +26,30 @@ export const useSettingStore = defineStore('setting', {
     }
   },
   actions: {
-    setTheme() {
-      this.isDarktheme = !this.isDarktheme;
-      this.themeZhCN = this.isDarktheme ? DARK : LIGHT
+    init() {
+      this.classOperation();
+    },
+    classOperation() {
+      let html = document.querySelector('html');
+      if (this.isDarktheme) {
+        html?.classList.add('dark')
+        html?.classList.remove('light');
+      } else {
+        html?.classList.remove('dark');
+        html?.classList.add('light')
+      }
+      html = null;
+    },
+    setTheme(bool: boolean) {
+      this.isDarktheme = bool;
+      this.classOperation();
+    },
+    setFollowSystem() {
+      this.isDarktheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      let html = document.querySelector('html');
+      html?.classList.remove('dark');
+      html?.classList.remove('light');
+      html = null;
     },
     setRgbColor(color: string, transparency = 1) {
       const num = color.slice(1).toUpperCase();

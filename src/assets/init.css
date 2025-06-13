@@ -1,0 +1,64 @@
+:root {
+    --pc-primary-color: rgba(0, 0, 255, 1);
+    --pc-success-color: rgba(0, 255, 0, 1);
+    --pc-error-color: rgba(255, 0, 0, 1);
+    --pc-info-color: rgba(255, 255, 0, 1);
+    /* --pc-info-color: rgba(128, 0, 128, 1); */
+
+    --pc-white: #fff;
+    --pc-black: #000;
+
+
+    --pc-active-color: #eee;
+
+    --pc-dark-theme-color-1: #eee;
+    /* 按钮激活色 pc端按钮hover色 header色 asider色 main色 */
+
+    --pc-gap-small: 0.4rem;
+    --pc-gap-medium: 0.6rem;
+    --pc-gap-normal: 1rem;
+    --pc-gap-large: 2rem;
+}
+
+.light {
+    --pc-theme-color: #fff;
+    --pc-theme-fs-color: #000;
+    --pc-hover-color: #eee;
+    --pc-border-color: #eee;
+}
+
+.dark {
+    --pc-theme-color: #111;
+    --pc-theme-fs-color: #eee;
+    --pc-hover-color: #555;
+    --pc-border-color: #555;
+}
+
+*,
+:after,
+:before {
+    box-sizing: border-box;
+}
+
+body,
+ul {
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    list-style: none;
+}
+
+button {
+    outline: none;
+    border: none;
+    background-color: var(--pc-theme-color);
+    color: var(--pc-theme-fs-color);
+    outline: 1px solid var(--pc-border-color);
+}
+
+a {
+    text-decoration: none;
+    color: var(--pc-theme-fs-color);
+}
