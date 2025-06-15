@@ -16,6 +16,7 @@ export const useSettingStore = defineStore('setting', {
     isDarktheme: false,
     isFollowSystem: false,
     foldNav: true,
+    color: '72, 61, 139'
   }),
   getters: {
     themeText(state) {
@@ -57,6 +58,13 @@ export const useSettingStore = defineStore('setting', {
       const g = parseInt(num.slice(2, 4), 16);
       const b = parseInt(num.slice(4, 6), 16);
       return `rgb(${r}, ${g}, ${b},${transparency})`;
+    },
+    setThemeColor(v: string) {
+      this.color = v;
+      const cs = v.match(/(\d+)/g);
+      if (cs) {
+        document.documentElement.style.setProperty('--pc-rgb', cs.join(','));
+      }
     }
   }
 })

@@ -22,13 +22,20 @@ body {
     align-items: center;
 }
 
+.dg-c {
+    display: grid;
+    grid-template-columns: auto 1fr;
+}
+
 .list a {
     display: block;
     padding: var(--pc-gap-normal);
+    overflow: hidden;
 }
 
 .list a:hover {
     background-color: var(--pc-hover-color);
+    color: var(--pc-theme-fs-color)
 }
 
 .list .list-item {
@@ -57,9 +64,9 @@ body {
 
 @media (prefers-color-scheme: dark) {
     html {
-        --pc-theme-color: #111;
-        --pc-theme-fs-color: #eee;
-        --pc-hover-color: #555;
-        --pc-border-color: #555;
+        --pc-theme-color: rgb(24, 24, 24);
+        --pc-theme-fs-color: rgb(234, 234, 234);
+        --pc-hover-color: rgb(66, 66, 66);
+        --pc-border-color: rgb(50, 50, 50);
     }
 }

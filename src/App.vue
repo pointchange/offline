@@ -20,6 +20,7 @@
     <header class="df-sb-c header">
       <Header></Header>
     </header>
+    <!-- <Transition name="nav"> -->
     <main class="main">
       <Nav></Nav>
       <article>
@@ -32,6 +33,8 @@
         </section>
       </article>
     </main>
+    <!-- </Transition> -->
+
     <!-- <Music></Music> -->
   </div>
 </template>
@@ -40,13 +43,28 @@
     height: 100%;
   }
 
+  .nav-enter-active,
+  .nav-leave-active {
+    transition: transform 0.4s ease;
+  }
+
+  .nav-enter-from,
+  .nav-leave-to {
+    transform: translate(-100%);
+  }
+
   .main {
     display: flex;
   }
 
   article {
     flex: 1;
+    width: 100%;
   }
+
+  /* article {
+    width: 100%;
+  } */
 
   .header {
     border-bottom: 1px solid var(--pc-border-color);

@@ -14,7 +14,6 @@
         Reversed = '反转'
     }
     const musicStore = useMusicStore();
-    const isMuted = ref(false);
     const OrderString = computed(() => {
         switch (musicStore.music.order) {
             case PlayMode.Random:
@@ -28,15 +27,7 @@
         }
     });
     const playString = computed(() => musicStore.music.playing ? '暂停' : "播放")
-    function timeFormat(time: number) {
-        function isUnitsDigit(n: number) {
-            return n < 10 ? '0' + n : n
-        }
-        let hour = isUnitsDigit(Math.floor(time / 3600));
-        let min = isUnitsDigit(Math.floor(time / 60) % 60);
-        let second = isUnitsDigit(Math.floor(time % 60));
-        return (+hour > 0 ? `${hour}:` : '') + `${min}:${second}`;
-    }
+
     let recordPreVolumn = 1;
     function volumnClick() {
         musicStore.isMuted = !musicStore.isMuted
@@ -59,14 +50,16 @@
     }" class="music-controls">
         <h2>{{ musicStore.DeleteFileSuffix(musicStore.music.name) }}</h2>
         <div>
+            <div class="time">{{ musicStore.timeFormat(musicStore.music.currentTime) }} / {{
+                musicStore.timeFormat(musicStore.music.duration)
+            }}</div>
             <input class="progress"
                 @input="(e: Event) => musicStore.progressChange(+(e.target as HTMLInputElement).value)"
                 :value="musicStore.music.currentTime" :min="0" step="any" :max="musicStore.music.duration" type="range"
                 name="progress">
         </div>
         <div class="df-sb-c ">
-            <span>{{ timeFormat(musicStore.music.currentTime) }} / {{ timeFormat(musicStore.music.duration)
-                }}</span>
+
             <div class="bottom-right">
                 <input @input="(e: Event) => musicStore.volumnChange(+(e.target as HTMLInputElement).value)"
                     v-model="musicStore.music.volumn" :min="0" :max="1" step="0.05" type="range" name="volumn">
@@ -86,6 +79,10 @@
     .music-controls {
         padding: var(--pc-gap-small);
         width: 100%;
+    }
+
+    .time {
+        font-size: 12px;
     }
 
     .bottom-right {
@@ -108,5 +105,6 @@
     .muted-volumn {
         background-color: var(--pc-border-color);
     }
+
 
 </style>

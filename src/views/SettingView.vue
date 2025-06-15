@@ -21,7 +21,14 @@
             value: FOLLOWSYSTEM,
             handle: setting.setFollowSystem,
         },
-    ]
+    ];
+    const themeColors = [
+        '72, 61, 139',
+        '34, 139, 34',
+        '220, 20, 60',
+        '255, 140, 0',
+    ];
+
 </script>
 <template>
     <div class="setting">
@@ -32,21 +39,13 @@
                         :value="item.value">
                     <span>{{ item.name }}</span>
                 </label>
-                <!-- <label>
-                    <input :checked="setting.themeValue === DARK" @change="() => setting.setTheme(true)" type="radio"
-                        name="theme" :value="DARK">
-                    <span>{{ DARKZHCN }}</span>
-                </label>
-                <label>
-                    <input :checked="setting.themeValue === LIGHT" @change="() => setting.setTheme(false)" type="radio"
-                        name="theme" :value="LIGHT">
-                    <span>{{ LIGHTZHCN }}</span>
-                </label>
-                <label>
-                    <input :checked="setting.themeValue === FOLLOWSYSTEM" @change="() => setting.setFollowSystem()"
-                        type="radio" name="theme" :value="FOLLOWSYSTEM">
-                    <span>{{ FOLLOWSYSTEMZHCN }}</span>
-                </label> -->
+            </li>
+            <li class="list-item ">
+                <button @click="setting.setThemeColor(name)" :class="{ 'button-active': setting.color === name }"
+                    :style="{
+                        backgroundColor: `rgb(${name})`,
+                    }" v-for="name in themeColors" class="button">&nbsp;</button>
+                <!-- <input type="color" @input="(e: Event) => setting.setThemeColor((e.target as HTMLInputElement).value)"> -->
             </li>
         </ul>
     </div>
@@ -58,6 +57,22 @@
 
     .list-item {
         display: flex;
+        align-items: center;
         gap: var(--pc-gap-normal);
+    }
+
+    .button {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 0.4rem;
+        opacity: 0.6;
+    }
+
+    .button-active {
+        opacity: 1;
+    }
+
+    .button:hover {
+        opacity: 1;
     }
 </style>

@@ -1,9 +1,12 @@
 :root {
-    --pc-primary-color: rgba(0, 0, 255, 1);
-    --pc-success-color: rgba(0, 255, 0, 1);
-    --pc-error-color: rgba(255, 0, 0, 1);
-    --pc-info-color: rgba(255, 255, 0, 1);
-    /* --pc-info-color: rgba(128, 0, 128, 1); */
+    /* darkslateblue forestgreen crimson darkorange*/
+    --pc-rgb: 72, 61, 139;
+    /* --pc-rgb: 0, 128, 0; */
+    --pc-primary-color: rgba(72, 61, 139, 1);
+    --pc-success-color: rgba(34, 139, 34, 1);
+    --pc-error-color: rgba(220, 20, 60, 1);
+    --pc-info-color: rgba(255, 140, 0, 1);
+    /* --pc-info-color: rgba(128, 0, 128, 1); rgb(255, 140, 0) #ff8c00*/
 
     --pc-white: #fff;
     --pc-black: #000;
@@ -18,25 +21,33 @@
     --pc-gap-medium: 0.6rem;
     --pc-gap-normal: 1rem;
     --pc-gap-large: 2rem;
+    --pc-theme-switch-color: rgb(24, 24, 24);
+
+    --pc-input-color: var(--pc-primary-color);
 }
 
 .light {
     --pc-theme-color: #fff;
     --pc-theme-fs-color: #000;
-    --pc-hover-color: #eee;
-    --pc-border-color: #eee;
+    --pc-border-color: rgba(72, 61, 139, 0.2);
+    --pc-theme-primary: rgba(var(--pc-rgb), 1);
+    --pc-hover-color: rgba(var(--pc-rgb), 0.1);
+    /* --pc-input-color: rgba(var(--pc-rgb), 0.1);
+    --pc-input-hover-color: var(--pc-theme-color); */
 }
 
 .dark {
-    --pc-theme-color: #111;
-    --pc-theme-fs-color: #eee;
-    --pc-hover-color: #555;
-    --pc-border-color: #555;
+    --pc-theme-color: rgb(24, 24, 24);
+    --pc-theme-fs-color: rgb(234, 234, 234);
+    --pc-border-color: rgb(50, 50, 50);
+    /*42, 38, 68*/
+    --pc-theme-primary: rgba(var(--pc-rgb), 1);
+    --pc-hover-color: rgba(var(--pc-rgb), 0.6);
+    /* --pc-input-color: rgba(var(--pc-rgb), 0.4);
+    --pc-input-hover-color: #fff; */
 }
 
-*,
-:after,
-:before {
+* {
     box-sizing: border-box;
 }
 

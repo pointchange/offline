@@ -92,13 +92,19 @@ export const useMusicStore = defineStore('music', {
             } catch (error) { return songFiles }
         },
         async playHandle(file: F) {
+            const name = file.name;
+            if (name === this.music.name) return;
+
+            this.music.name = name;
+
             if (file instanceof FileSystemFileHandle) {
-                this.audio.src = URL.createObjectURL(await file.getFile());
+                const f = await file.getFile();
+                console.log(f);
+                this.audio.src = URL.createObjectURL(f);
             } else {
                 this.audio.src = URL.createObjectURL(file);
             }
-            this.music.name = file.name;
-            const name = file.name;
+
             this.oldIndex = this.currentIndex;
             this.currentIndex = this.list.findIndex(v => v.name === name);
         },
@@ -186,6 +192,15 @@ export const useMusicStore = defineStore('music', {
             const nameArr = name.split('.');
             const len = nameArr.length - 1;
             return nameArr[len];
+        },
+        timeFormat(time: number) {
+            function isUnitsDigit(n: number) {
+                return n < 10 ? '0' + n : n
+            }
+            let hour = isUnitsDigit(Math.floor(time / 3600));
+            let min = isUnitsDigit(Math.floor(time / 60) % 60);
+            let second = isUnitsDigit(Math.floor(time % 60));
+            return (+hour > 0 ? `${hour}:` : '') + `${min}:${second}`;
         }
     },
 })

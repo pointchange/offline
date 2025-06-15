@@ -5,8 +5,11 @@
     // const arr = randomColor(musicStore.encodeTotal)
     // let colors = arr.reduce((pre, v, i) => ({ ...pre, ...{ [musicStore.encode[i].toUpperCase()]: v } }), {});
     function clear() {
+        musicStore.audio.pause();
+        musicStore.destory();
         musicStore.clear();
         musicStore.$reset();
+        musicStore.init();
     }
     // function randomColor(n: number) {
     //     function randomNumber() {
@@ -28,7 +31,7 @@
             <Music />
             <div class="header-bottom">
                 <div class="df-sb-c">
-                    <input class="input" v-model.lazy="musicStore.keyword" type="text">
+                    <input placeholder="搜 索" class="input" v-model.lazy="musicStore.keyword" type="text">
                     <button @click="musicStore.keyword = ''" class="button clear-input">X</button>
                 </div>
                 <div>
@@ -66,12 +69,13 @@
     }
 
     .header {
-        padding-bottom: 1rem;
+        padding: 1rem;
         position: sticky;
         top: 0;
         display: grid;
         gap: var(--pc-gap-small);
         background-color: var(--pc-theme-color);
+        border-bottom: 1px solid var(--pc-border-color);
     }
 
     .header-bottom {
@@ -84,7 +88,9 @@
     }
 
     .input:focus {
-        outline-color: var(--pc-border-color);
+        outline-width: 2px;
+        outline-color: var(--pc-theme-primary);
+        caret-color: var(--pc-theme-fs-color)
     }
 
     .input {
@@ -109,6 +115,12 @@
         font-size: 2rem;
         border: 1px solid var(--pc-border-color);
         border-radius: 1rem;
+    }
+
+    @media screen and (max-width:480px) {
+        .empty-button {
+            font-size: 1.4rem;
+        }
     }
 
     .empty-button:hover {

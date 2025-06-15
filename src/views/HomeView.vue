@@ -30,6 +30,10 @@
         gap: var(--pc-gap-small);
     }
 
+    audio {
+        display: block;
+    }
+
     .count {
         border-bottom: 1px solid var(--pc-border-color);
     }
