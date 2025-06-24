@@ -12,7 +12,18 @@ const routes = [
         meta: {
             keepAlive: true,
         },
-        component: () => import('../views/MusicView.vue'),
+        children: [
+            {
+                path: '',
+                name: 'musicView',
+                component: () => import('../views/MusicView.vue'),
+            },
+            {
+                path: 'musicLayoutView',
+                name: 'MusicLayoutView',
+                component: () => import('../views/MusicLayoutView.vue'),
+            },
+        ],
     },
     {
         path: '/setting',

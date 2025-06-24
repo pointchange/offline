@@ -1,11 +1,25 @@
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
+import { parseWebStream } from 'music-metadata';
+import { getMusicCover, openDirectory, parseLrc } from '@/utils/music';
+
 enum PlayMode {
     Order,
     Random,
     Repeat,
     Reversed
 }
+enum PlayModeString {
+    Order = '顺序',
+    Random = '随机',
+    Repeat = '重复',
+    Reversed = '反转'
+}
 
+
+interface ActiveLrc {
+    index: number,
+    texts: number
+}
 export const useMusicStore = defineStore('music', {
     state: () => ({
         audio: new Audio(),
@@ -18,10 +32,16 @@ export const useMusicStore = defineStore('music', {
             playing: false,
             name: ''
         },
-        // music: {
-        //     url: '',
-        //     name: '',
-        // },
+        musicMetadata: {
+            artist: '',
+            title: '',
+            pic: false,
+            bitrate: 0,
+            duration: 0,
+            lossless: false,
+            sampleRate: 0
+        },
+        pictureUrl: '',
         isMuted: false,
         list: [] as F[],
         isShowMusicComponent: false,
@@ -29,7 +49,19 @@ export const useMusicStore = defineStore('music', {
         currentIndex: 0,
         oldIndex: 0,
         encode: ['mp3', 'mp4a', 'flac', 'ogg',],
-        isPlaying: false
+        isPlaying: false,
+        recordPreVolumn: 1,
+        oldUrl: '',
+        cover: '',
+
+        lrc: [] as LRC[],
+        lrcList: [] as F[],
+        lrcEncode: ['lrc'],
+        lrcIndex: 0,
+        activeLrc: {
+            index: 0,
+            texts: 0,
+        } as ActiveLrc
     }),
     getters: {
         filterList(state) {
@@ -45,25 +77,73 @@ export const useMusicStore = defineStore('music', {
         },
         encodeTotal(state) {
             return state.encode.length;
-        }
+        },
+        playString(state) {
+            return state.music.playing ? '暂停' : "播放"
+        },
+        OrderString(state) {
+            switch (state.music.order) {
+                case PlayMode.Random:
+                    return PlayModeString.Random;
+                case PlayMode.Repeat:
+                    return PlayModeString.Repeat;
+                case PlayMode.Reversed:
+                    return PlayModeString.Reversed;
+                default:
+                    return PlayModeString.Order;
+            }
+        },
+        getImageURL(state) {
+            return state.musicMetadata.pic ? state.pictureUrl : state.cover;
+        },
+        getLrcListTotal(state) {
+            return state.lrcList.length;
+        },
+        hasLrcListTotal(state) {
+            return state.lrcList.length > 0;
+        },
+        getLrcTotal(state) {
+            return state.lrc.length;
+        },
+        hasLrc(state) {
+            return state.lrc.length > 0
+        },
     },
 
     actions: {
-        init() {
+        async init() {
             this.audio.onended = this.endedHandle;
             this.audio.ontimeupdate = (e: Event) => {
                 const audio = e.target as HTMLAudioElement;
-                this.music.currentTime = audio.currentTime;
+                const t = audio.currentTime;
+                this.music.currentTime = t;
+
+                if (this.lrc.length === 0) return;
+                this.activeLrc.texts = 0;
+                let i = this.lrc.findIndex(v => v.time >= t);
+                let index = i - 1;
+                if (index < 0) return;
+                this.activeLrc.index = index;
+                this.activeLrc.texts++;
+
+                let nextI = i + 1;
+                while (nextI < this.getLrcTotal && this.lrc[i].time === this.lrc[nextI].time) {
+                    this.activeLrc.texts++
+                    nextI++;
+                }
             }
             this.audio.oncanplay = (e: Event) => {
                 const audio = e.target as HTMLAudioElement;
+                if (audio.src === this.url && !this.music.playing) return;
                 audio.play();
+                this.url = audio.src;
                 this.music.duration = audio.duration;
                 this.music.playing = true;
             }
             this.audio.onerror = (e) => {
-                console.log(e);
+                // console.log(e);
             }
+            this.cover = await getMusicCover();
         },
         destory() {
             this.audio.onended = null;
@@ -71,25 +151,29 @@ export const useMusicStore = defineStore('music', {
             this.audio.oncanplay = null;
             this.audio.onerror = null;
         },
-        async openDirectory() {
-            const songFiles: FileSystemFileHandle[] = [];
-            try {
-                const directory = await window.showDirectoryPicker();
-                const list = [];
-                const files = await directory.entries();
-                for await (const item of files) {
-                    list.push(item);
-                }
-                for (let i = 0; i < list.length; i++) {
-                    const item = list[i];
-                    const bool = this.encode.some(v => new RegExp(v, 'ig').test(item[1].name)) && item[1].kind === 'file';
-                    if (bool) {
-                        songFiles.push(item[1]);
-                    }
-                }
-                return songFiles
+        async getSongInfo() {
+            const response = await fetch(this.audio.src);
+            const webStream = response.body;
+            const metadata = await parseWebStream(webStream, 'audio/mpeg');
 
-            } catch (error) { return songFiles }
+            // console.log(metadata);
+            let { artist, title, picture } = metadata.common;
+            let { bitrate, duration, sampleRate, lossless } = metadata.format;
+            artist = artist || '';
+            title = title || this.DeleteFileSuffix(this.music.name);
+            bitrate = bitrate || 0;
+            duration = duration || 0;
+            sampleRate = sampleRate || 0;
+            lossless = lossless ? true : false;
+            let pic = false;
+            if (picture) {
+                pic = true;
+                const blob = new Blob([picture[0].data.buffer], { type: picture[0].format })
+                this.pictureUrl = URL.createObjectURL(blob)
+            }
+            this.musicMetadata = {
+                artist, title, bitrate, duration, sampleRate, lossless, pic
+            }
         },
         async playHandle(file: F) {
             const name = file.name;
@@ -99,10 +183,20 @@ export const useMusicStore = defineStore('music', {
 
             if (file instanceof FileSystemFileHandle) {
                 const f = await file.getFile();
-                console.log(f);
                 this.audio.src = URL.createObjectURL(f);
             } else {
                 this.audio.src = URL.createObjectURL(file);
+            }
+            await this.getSongInfo();
+            const soneName = this.musicMetadata.title || this.DeleteFileSuffix(name);
+            const reg = new RegExp(soneName, 'ig');
+            const lrcItem = this.lrcList.find(v => reg.test(v.name));
+            if (typeof lrcItem !== 'undefined' && lrcItem instanceof FileSystemFileHandle) {
+                const lrcFile = await lrcItem.getFile();
+                const contents = await lrcFile.text();
+                this.lrc = parseLrc(contents);
+            } else {
+                this.lrc = [];
             }
 
             this.oldIndex = this.currentIndex;
@@ -112,10 +206,37 @@ export const useMusicStore = defineStore('music', {
             this.list = []
         },
         add(list: F[]) {
-            this.list.unshift(...list)
+            const m1 = new Map();
+
+            list.forEach(item => {
+                const v = m1.get(item.name)
+                if (typeof v === 'undefined') {
+                    m1.set(item.name, item);
+                }
+            });
+            let l = [] as F[];
+            m1.forEach(v => {
+                l.push(v);
+            })
+            if (this.total > 0) {
+                const m1 = new Map();
+                this.list.forEach(item => {
+                    m1.set(item.name, item);
+                });
+                l.forEach(file => {
+                    const v = m1.get(file.name)
+                    if (typeof v === 'undefined') {
+                        m1.set(file.name, file);
+                    }
+                });
+                this.list = [...m1.values()];
+
+            } else {
+                this.list.unshift(...l)
+            }
         },
         async addList() {
-            const list = await this.openDirectory();
+            const list = await openDirectory(this.encode);
             const len = list.length;
             if (len > 0) {
                 this.add(list);
@@ -177,7 +298,7 @@ export const useMusicStore = defineStore('music', {
             }
         },
         progressChange(value: number) {
-            this.audio.currentTime = value
+            this.audio.currentTime = value;
         },
         volumnChange(value: number) {
             this.audio.volume = value;
@@ -201,6 +322,25 @@ export const useMusicStore = defineStore('music', {
             let min = isUnitsDigit(Math.floor(time / 60) % 60);
             let second = isUnitsDigit(Math.floor(time % 60));
             return (+hour > 0 ? `${hour}:` : '') + `${min}:${second}`;
+        },
+        playBtnHandle() {
+            this.music.playing = !this.music.playing;
+            this.music.playing ? this.audio.play() : this.audio.pause();
+        },
+        volumnClick() {
+            this.isMuted = !this.isMuted
+            this.audio.muted = this.isMuted
+            if (this.isMuted) {
+                this.recordPreVolumn = this.music.volumn;
+                this.music.volumn = 0;
+            } else {
+                this.music.volumn = this.recordPreVolumn;
+            }
+        },
+        async addLrc() {
+            const directory = await openDirectory(this.lrcEncode);
+            if (directory.length === 0) return;
+            this.lrcList.push(...directory);
         }
     },
 })

@@ -24,3 +24,7 @@ enum BtnList {
 }
 
 type F = FileSystemFileHandle | File
+
+interface LRC {
+    text: string, time: number
+}

@@ -1,7 +1,6 @@
 <script lang="ts" setup>
   import { onMounted } from 'vue';
   import Header from './components/Header.vue';
-  // import Music from './components/music/Music.vue';
   import Nav from './components/Nav.vue';
   import { useSettingStore } from './stores/setting';
   import { useMusicStore } from './stores/music';
@@ -20,7 +19,6 @@
     <header class="df-sb-c header">
       <Header></Header>
     </header>
-    <!-- <Transition name="nav"> -->
     <main class="main">
       <Nav></Nav>
       <article>
@@ -33,9 +31,6 @@
         </section>
       </article>
     </main>
-    <!-- </Transition> -->
-
-    <!-- <Music></Music> -->
   </div>
 </template>
 <style scoped>

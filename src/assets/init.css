@@ -29,6 +29,7 @@
 .light {
     --pc-theme-color: #fff;
     --pc-theme-fs-color: #000;
+    --pc-theme-fs-tint-color: #888;
     --pc-border-color: rgba(72, 61, 139, 0.2);
     --pc-theme-primary: rgba(var(--pc-rgb), 1);
     --pc-hover-color: rgba(var(--pc-rgb), 0.1);
@@ -39,6 +40,7 @@
 .dark {
     --pc-theme-color: rgb(24, 24, 24);
     --pc-theme-fs-color: rgb(234, 234, 234);
+    --pc-theme-fs-tint-color: #999;
     --pc-border-color: rgb(50, 50, 50);
     /*42, 38, 68*/
     --pc-theme-primary: rgba(var(--pc-rgb), 1);

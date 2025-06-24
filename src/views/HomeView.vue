@@ -1,7 +1,8 @@
 <script lang="ts" setup>
     import { routesTotal } from '@/router';
+    import { useSettingStore } from '@/stores/setting';
     import { useRouter } from 'vue-router';
-
+    const settingStore = useSettingStore();
     const router = useRouter();
     function toView() {
         router.push('music');
@@ -15,12 +16,16 @@
             <h1 class="h1">{{ routesTotal }}</h1>
         </div>
         <div class="border-b"></div>
-        <div class="card">
-            <div @click="toView" class="card-item">
+        <article class="card-container">
+            <section @click="toView" class="card">
                 <span>音乐</span>
-                <audio controls></audio>
-            </div>
-        </div>
+                <div class="card-content">
+                    <audio :class="{
+                        'audio-dark-theme': settingStore.isDarktheme
+                    }" controls></audio>
+                </div>
+            </section>
+        </article>
     </div>
 </template>
 <style scoped>
@@ -32,6 +37,11 @@
 
     audio {
         display: block;
+        pointer-events: none;
+    }
+
+    .audio-dark-theme {
+        opacity: 0.5;
     }
 
     .count {
@@ -46,20 +56,28 @@
         font-size: 2rem;
     }
 
-    .card-item {
-        padding: var(--pc-gap-normal) 0;
+    .card {
+        padding: var(--pc-gap-large);
         display: flex;
         flex-direction: column;
-        width: 300px;
+        width: 350px;
         gap: var(--pc-gap-small);
         border: 1px solid var(--pc-border-color);
     }
 
-    .card-item span {
-        margin-left: var(--pc-gap-normal);
+    .card-content {
+        display: grid;
+        justify-content: center;
     }
 
-    audio {
-        pointer-events: none;
+    @media screen and (max-width:480px) {
+        .card {
+            width: 100%;
+            justify-content: center;
+        }
     }
+
+
+
+
 </style>

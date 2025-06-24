@@ -33,7 +33,7 @@ body {
     overflow: hidden;
 }
 
-.list a:hover {
+.list li:hover {
     background-color: var(--pc-hover-color);
     color: var(--pc-theme-fs-color)
 }

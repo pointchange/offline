@@ -47,6 +47,9 @@
                     }" v-for="name in themeColors" class="button">&nbsp;</button>
                 <!-- <input type="color" @input="(e: Event) => setting.setThemeColor((e.target as HTMLInputElement).value)"> -->
             </li>
+            <li class="copy-right">
+                <a href="https://github.com/pointchange" target="_blank">Copyright 2025 pointchange</a>
+            </li>
         </ul>
     </div>
 </template>
@@ -74,5 +77,10 @@
 
     .button:hover {
         opacity: 1;
+    }
+
+
+    .copy-right:hover {
+        text-decoration: underline;
     }
 </style>

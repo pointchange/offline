@@ -8,10 +8,11 @@
 | :----: | :----: |
 | [vue](https://cn.vuejs.org/) | 数据驱动视图 |
 | [pinia](https://pinia.vuejs.org/zh/) | 状态抽取、集中管理 |
+| [music-metadata](https://github.com/Borewit/music-metadata/) | 解析音频文件、获取音频信息 |
 
 ## 音乐播放器 （待完成……）
 
-基础功能：播放 / 暂停、下 / 上一首、播放顺序、添加 / 拖拽音频文件
+基础功能：播放 / 暂停、下 / 上一首、播放顺序、添加 / 拖拽音频文件 、歌词、兼容大部分移动端
 
 ## 设置
 
