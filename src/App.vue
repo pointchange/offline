@@ -36,6 +36,7 @@
 <style scoped>
   .home {
     height: 100%;
+    overflow: hidden;
   }
 
   .nav-enter-active,
@@ -57,20 +58,11 @@
     width: 100%;
   }
 
-  /* article {
-    width: 100%;
-  } */
-
   .header {
     border-bottom: 1px solid var(--pc-border-color);
   }
 
   .section {
     height: calc(100vh - 54px);
-  }
-
-
-  footer {
-    /* border: 1px solid #eee; */
   }
 </style>

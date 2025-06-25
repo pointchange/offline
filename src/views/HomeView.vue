@@ -31,8 +31,11 @@
 <style scoped>
     .home-view {
         padding: 0 var(--pc-gap-small);
-        display: grid;
+        display: flex;
+        flex-direction: column;
         gap: var(--pc-gap-small);
+        width: 100%;
+        height: 100%;
     }
 
     audio {

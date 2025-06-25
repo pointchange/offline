@@ -94,6 +94,29 @@ async function openDirectory(encode: string[]) {
 // function getSuffix(name: string) {
 //     return musicStore.getFileSuffix(name).toUpperCase();
 // }
+
+/**
+ * 
+ * @param name filename 、 path 、address. example: xxxyyy.mp3
+ * @returns no file suffix, just name. get example:  xxxyyy
+ */
+function deleteFileSuffix(name: string) {
+    const nameArr = name.split('.');
+    const len = nameArr.length - 1;
+    return name.replace('.' + nameArr[len], '');
+}
+/**
+ * 
+ * @param name filename 、 path 、address. example: xxxyyy.mp3
+ * @returns no filename, get file suffix. example: mp3 
+ */
+function getFileSuffix(name: string) {
+    const nameArr = name.split('.');
+    const lastIndex = nameArr.length - 1;
+    console.log(lastIndex, nameArr);
+    return nameArr[lastIndex];
+}
+
 export {
-    parseLrc, getMusicCover, openDirectory
+    parseLrc, getMusicCover, openDirectory, deleteFileSuffix, getFileSuffix,
 }

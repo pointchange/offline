@@ -184,6 +184,10 @@
         cursor: pointer;
     }
 
+    .range:hover .slider-thumb {
+        opacity: 1;
+    }
+
     .line {
         position: relative;
         margin-left: calc(-1 * var(--r) / 2);
@@ -220,6 +224,7 @@
         outline: 2px solid transparent;
         transform: translateX(0px);
         cursor: grab;
+        opacity: 0;
     }
 
     .tooltip {

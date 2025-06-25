@@ -3,13 +3,10 @@
     import { useMusicStore } from '@/stores/music';
 
     const musicStore = useMusicStore();
-    import Range from '@/components/other/Range.vue';
-
 </script>
 <template>
     <FirstMusic v-if="musicStore.total > 0" />
     <div v-else class="df-c-c empty ">
-        <!-- <Range :height="10"></Range> -->
         <p>tip: 添加音频文件</p>
         <button class="empty-button big-btn" @click="() => musicStore.addList()">打开文件夹</button>
     </div>

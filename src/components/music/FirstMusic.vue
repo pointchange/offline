@@ -1,47 +1,12 @@
 <script lang="ts" setup>
     import { useMusicStore } from '@/stores/music';
-    import { computed, onMounted, onUnmounted, onUpdated, ref, useTemplateRef, watch } from 'vue';
+    import { onMounted, onUnmounted, ref } from 'vue';
     import Range from '../other/Range.vue';
-    import { useRouter } from 'vue-router';
+    import FirstMusicList from './FirstMusicList.vue';
+    import FirstMusicLyric from './FirstMusicLyric.vue';
     const musicStore = useMusicStore();
-    const showMenu = ref(false);
-    const showLrcMenu = ref(false);
     const lessthen1024 = ref(false);
-    const router = useRouter();
-    const lyricRef = useTemplateRef("lyricRef");
 
-    const lrcHeight = ref(0);
-    const lrcLineHeight = computed(() => {
-        if (musicStore.hasLrc) {
-            return lrcHeight.value / musicStore.getLrcTotal;
-        } else {
-            return 0;
-        }
-    });
-
-    function openLrcMenu() {
-        showLrcMenu.value = !showLrcMenu.value;
-    }
-    function clearLrc() {
-        musicStore.lrcList = [];
-    }
-    function clear() {
-        musicStore.audio.pause();
-        musicStore.destory();
-        musicStore.clear();
-        musicStore.$reset();
-        musicStore.init();
-    }
-
-    function switchMenu() {
-        showMenu.value = !showMenu.value
-    }
-
-    function countHeight() {
-        if (!musicStore.hasLrc) return 0;
-        const { index } = musicStore.activeLrc;
-        return -lrcLineHeight.value * index - lrcLineHeight.value / 2;
-    }
     let observer: ResizeObserver;
     onMounted(() => {
         observer = new ResizeObserver((entries) => {
@@ -56,74 +21,12 @@
     onUnmounted(() => {
         observer.unobserve(document.body);
     })
-    onUpdated(() => {
-        if (musicStore.hasLrc) {
-            if (!lyricRef.value) return;
-            lrcHeight.value = lyricRef.value.getBoundingClientRect().height;
-        }
-    })
-    function playHandle(file: F) {
-        musicStore.playHandle(file);
-        if (lessthen1024.value) {
-            router.push('/music/musicLayoutView');
-        }
-    }
+
 </script>
 <template>
     <div class="music">
-        <section class="music-list">
-            <header class="header">
-                <div class="menu-container">
-                    <button @click="switchMenu" class="button clear-input menu">···</button>
-                    <Transition name="menu">
-                        <ul v-show="showMenu" @click="switchMenu" class="list menu-list">
-                            <li @click="clear"><a href="javascript:;">清除列表</a></li>
-                        </ul>
-                    </Transition>
-                    <div @click="switchMenu" v-show="showMenu" class="modal"></div>
-                </div>
-                <input placeholder="搜 索" class="input" v-model.lazy="musicStore.keyword" type="text">
-                <button @click="musicStore.keyword = ''" class="button clear-input">X</button>
-            </header>
-            <main>
-                <ul class="list">
-                    <li v-for="(item, index) in musicStore.filterList" :key="item.name"
-                        :class="{ 'list-li-active': musicStore.currentIndex === index }" @click="playHandle(item)">
-                        <a href="javascript:;">{{ musicStore.DeleteFileSuffix(item.name) }}</a>
-                    </li>
-                </ul>
-            </main>
-        </section>
-        <section class="music-lyric">
-            <div class="menu-container lrc-menu">
-                <button @click="openLrcMenu" class="button clear-input menu">词</button>
-                <Transition name="menu">
-                    <ul v-show="showLrcMenu" @click="openLrcMenu" class="list menu-list">
-                        <li @click="clearLrc"><a href="javascript:;">清除全部歌词</a></li>
-                        <li @click="musicStore.addLrc"><a href="javascript:;">打开文件夹</a></li>
-                    </ul>
-                </Transition>
-                <div @click="openLrcMenu" v-show="showLrcMenu" class="modal"></div>
-            </div>
-            <div v-show="musicStore.hasLrcListTotal">
-                <div v-active="{ name: 'lyric-active', index: musicStore.activeLrc.index, count: musicStore.activeLrc.texts }"
-                    ref="lyricRef" class="lyric-container" v-show="musicStore.hasLrc" :style="{
-                        transform: `translateY(${countHeight()}px)`
-                    }">
-                    <p v-for="item in musicStore.lrc">{{ item.text }}</p>
-                </div>
-                <div v-show="!musicStore.hasLrc" class="df-c-c">
-                    <p>暂无歌词</p>
-                </div>
-            </div>
-            <div class="empty " v-show="!musicStore.hasLrcListTotal">
-                <p>tip: 添加LRC文件 </p>
-                <button class="button open-directory" @click="musicStore.addLrc">打开文件夹</button>
-            </div>
-
-            <button style="position: fixed; top: 0; z-index: 10;" class="button"
-                @click="() => musicStore.lrc = []">清空lrc</button>
-        </section>
+        <FirstMusicList :lessthen1024="lessthen1024"></FirstMusicList>
+        <FirstMusicLyric></FirstMusicLyric>
         <section class="music-singer">
             <div class="img">
                 <img :src="musicStore.getImageURL" :alt="musicStore.musicMetadata.artist">
@@ -226,21 +129,6 @@
         align-items: center;
     }
 
-    .music-list {
-        padding: 0 var(--pc-gap-normal);
-        overflow-y: scroll;
-    }
-
-    .music-lyric {
-        padding: var(--pc-gap-large);
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        overflow: hidden;
-    }
-
     .music-singer {
         padding: var(--pc-gap-large);
         display: flex;
@@ -269,144 +157,20 @@
         letter-spacing: 0.1rem;
     }
 
-    .clear-input {
-        border-radius: 0.4rem;
-    }
-
-    .menu {
-        font-weight: bolder;
-        letter-spacing: 0.1rem;
-    }
-
-    .menu-container {
-        position: relative;
-    }
-
-    .menu-list {
-        margin-top: var(--pc-gap-small);
-        position: fixed;
-        z-index: 10;
-        display: grid;
-        background-color: var(--pc-theme-color);
-        box-shadow: 0 0 0.4rem var(--pc-border-color);
-        border: 1px solid var(--pc-border-color);
-    }
-
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-    }
-
-    .header {
-        padding: 1rem;
-        position: sticky;
-        top: 0;
-        display: flex;
-        align-items: center;
-        gap: var(--pc-gap-normal);
-        background-color: var(--pc-theme-color);
-        border-bottom: 1px solid var(--pc-border-color);
-    }
-
     main {
         padding-bottom: 1rem;
-    }
-
-    .input:focus {
-        outline-width: 2px;
-        outline-color: var(--pc-theme-primary);
-        caret-color: var(--pc-theme-fs-color)
-    }
-
-    .input {
-        padding: 0.6rem;
-        width: 100%;
-        border: none;
-        outline: 1px solid var(--pc-border-color);
-        border-radius: 0.6rem;
-        background-color: var(--pc-theme-color);
-    }
-
-    .list li {
-        border-bottom: 1px solid var(--pc-border-color);
-    }
-
-    .list-li-active {
-        background-color: var(--pc-hover-color);
     }
 
     .muted-volumn {
         opacity: 0.6;
     }
 
-    .lyric-container {
-        position: absolute;
-        top: 48%;
-        opacity: 0.9;
-        transition: transform 0.8s ease, opacity 0.8s ease;
-    }
-
-    .lyric-container p {
-        text-align: center;
-    }
-
-    .lyric-active {
-        opacity: 1;
-        font-weight: 900;
-        color: var(--pc-theme-primary);
-    }
-
-    .empty {
-        flex-direction: column;
-    }
-
-    .empty p {
-        opacity: 0.8;
-    }
-
-    .empty .open-directory {
-        font-size: 1.2rem;
-        border-radius: var(--pc-gap-small);
-    }
-
-    .lrc-menu {
-        position: absolute;
-        top: var(--pc-gap-small);
-        right: var(--pc-gap-small);
-    }
-
-    .lrc-menu button {
-        padding: var(--pc-gap-small);
-        font-weight: 400;
-    }
-
-    .menu-enter-active,
-    .menu-leave-active {
-        transform-origin: top left;
-        transition: transform 0.2s ease, opacity 0.2s ease;
-    }
-
-    .menu-enter-from,
-    .menu-leave-to {
-        opacity: 0;
-        transform: scale(0)
-    }
-
-
     @media screen and (max-width:1024px) {
         .music {
             display: block;
         }
 
-        .music-list {
-            height: 100%;
-        }
-
         .music-singer,
-        .music-lyric,
         .music-bottom {
             display: none;
         }

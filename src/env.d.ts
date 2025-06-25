@@ -24,3 +24,7 @@ enum BtnList {
 }
 
 type F = FileSystemFileHandle | File
+
+interface AudioFile {
+    string: F
+}

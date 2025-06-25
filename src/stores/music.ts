@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { parseWebStream } from 'music-metadata';
-import { getMusicCover, openDirectory, parseLrc } from '@/utils/music';
+import { deleteFileSuffix, getMusicCover, openDirectory, parseLrc } from '@/utils/music';
 
 enum PlayMode {
     Order,
@@ -55,13 +55,14 @@ export const useMusicStore = defineStore('music', {
         cover: '',
 
         lrc: [] as LRC[],
-        lrcList: [] as F[],
+        lrcList: new Map<string, F>(),
         lrcEncode: ['lrc'],
         lrcIndex: 0,
         activeLrc: {
             index: 0,
             texts: 0,
-        } as ActiveLrc
+        } as ActiveLrc,
+        userSelect: false
     }),
     getters: {
         filterList(state) {
@@ -97,10 +98,10 @@ export const useMusicStore = defineStore('music', {
             return state.musicMetadata.pic ? state.pictureUrl : state.cover;
         },
         getLrcListTotal(state) {
-            return state.lrcList.length;
+            return state.lrcList.size;
         },
         hasLrcListTotal(state) {
-            return state.lrcList.length > 0;
+            return state.lrcList.size > 0;
         },
         getLrcTotal(state) {
             return state.lrc.length;
@@ -160,7 +161,7 @@ export const useMusicStore = defineStore('music', {
             let { artist, title, picture } = metadata.common;
             let { bitrate, duration, sampleRate, lossless } = metadata.format;
             artist = artist || '';
-            title = title || this.DeleteFileSuffix(this.music.name);
+            title = title || deleteFileSuffix(this.music.name);
             bitrate = bitrate || 0;
             duration = duration || 0;
             sampleRate = sampleRate || 0;
@@ -188,24 +189,53 @@ export const useMusicStore = defineStore('music', {
                 this.audio.src = URL.createObjectURL(file);
             }
             await this.getSongInfo();
-            const soneName = this.musicMetadata.title || this.DeleteFileSuffix(name);
-            const reg = new RegExp(soneName, 'ig');
-            const lrcItem = this.lrcList.find(v => reg.test(v.name));
+
+            this.oldIndex = this.currentIndex;
+            this.currentIndex = this.list.findIndex(v => v.name === name);
+
+            if (this.userSelect) return;
+            const soneName1 = this.musicMetadata.title;
+            const soneName2 = deleteFileSuffix(name);
+            const reg1 = new RegExp(soneName1, 'ig');
+            const reg2 = new RegExp(soneName2, 'ig');
+            let lrcItem: F | any = undefined;
+            this.lrcList.forEach((value, key) => {
+                if ((soneName1 !== '' && reg1.test(key)) || (soneName2 !== '' && reg2.test(key))) {
+                    lrcItem = value;
+                }
+            })
+
+            // let lrcItem = this.lrcList.keys().find(v => (soneName1 !== '' && reg1.test(v.name)) ||
+            //     (soneName2 !== '' && reg2.test(v.name))
+            // );
+            // const lrcItem = this.lrcList.get(soneName1) || this.lrcList.get(soneName2);
+            if (typeof lrcItem === 'undefined') {
+                this.lrc = [];
+            }
             if (typeof lrcItem !== 'undefined' && lrcItem instanceof FileSystemFileHandle) {
                 const lrcFile = await lrcItem.getFile();
                 const contents = await lrcFile.text();
                 this.lrc = parseLrc(contents);
-            } else {
-                this.lrc = [];
+            }
+            if (typeof lrcItem !== 'undefined' && lrcItem instanceof File) {
+                const reader = new FileReader();
+                reader.readAsText(lrcItem);
+                reader.onload = () => {
+                    this.lrc = parseLrc(reader.result as string)
+                }
             }
 
-            this.oldIndex = this.currentIndex;
-            this.currentIndex = this.list.findIndex(v => v.name === name);
         },
         clear() {
             this.list = []
         },
-        add(list: F[]) {
+        /**
+         * get unique array  
+         * @param list new array
+         * @param list2 old array
+         * @returns array
+         */
+        add(list: F[], list2: F[]) {
             const m1 = new Map();
 
             list.forEach(item => {
@@ -218,28 +248,31 @@ export const useMusicStore = defineStore('music', {
             m1.forEach(v => {
                 l.push(v);
             })
+            let arr = [] as F[];
             if (this.total > 0) {
                 const m1 = new Map();
-                this.list.forEach(item => {
+                list2.forEach(item => {
                     m1.set(item.name, item);
                 });
+                const m2 = new Map();
                 l.forEach(file => {
                     const v = m1.get(file.name)
                     if (typeof v === 'undefined') {
-                        m1.set(file.name, file);
+                        m2.set(file.name, file);
                     }
                 });
-                this.list = [...m1.values()];
+                arr = [...m2.values(), ...m1.values()];
 
             } else {
-                this.list.unshift(...l)
+                arr.push(...l)
             }
+            return arr;
         },
         async addList() {
             const list = await openDirectory(this.encode);
             const len = list.length;
             if (len > 0) {
-                this.add(list);
+                this.list = this.add(list, this.list);
                 this.currentIndex += len;
             }
         },
@@ -304,16 +337,6 @@ export const useMusicStore = defineStore('music', {
             this.audio.volume = value;
             this.isMuted = value === 0;
         },
-        DeleteFileSuffix(name: string) {
-            const nameArr = name.split('.');
-            const len = nameArr.length - 1;
-            return name.replace('.' + nameArr[len], '');
-        },
-        getFileSuffix(name: string) {
-            const nameArr = name.split('.');
-            const len = nameArr.length - 1;
-            return nameArr[len];
-        },
         timeFormat(time: number) {
             function isUnitsDigit(n: number) {
                 return n < 10 ? '0' + n : n
@@ -337,10 +360,29 @@ export const useMusicStore = defineStore('music', {
                 this.music.volumn = this.recordPreVolumn;
             }
         },
-        async addLrc() {
+        addLrc(list: Map<string, F>, array: F[]) {
+            let m = new Map<string, F>();
+            if (list.size !== 0) {
+                list.forEach((value, key) => {
+                    m.set(key, value);
+                })
+            }
+            for (let i = 0; i < array.length; i++) {
+                const item = array[i];
+                const key = m.get(item.name);
+                if (typeof key === 'undefined') {
+                    m.set(item.name, item);
+                }
+            }
+            return m;
+        },
+        async addLrcList() {
             const directory = await openDirectory(this.lrcEncode);
             if (directory.length === 0) return;
-            this.lrcList.push(...directory);
+            this.lrcList = this.addLrc(this.lrcList, directory);
+        },
+        async appointFile() {
+
         }
     },
 })
