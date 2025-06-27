@@ -3,13 +3,15 @@
     import { ref, useTemplateRef } from 'vue';
     import { useRouter } from 'vue-router';
     import { deleteFileSuffix } from '@/utils/music';
+    import Dialog from '../other/Dialog.vue';
+    import Menu from '../other/Menu.vue';
 
     const props = defineProps(['lessthen1024']);
     const musicStore = useMusicStore();
     const isDragover = ref(false);
     const router = useRouter();
     const showMenu = ref(false);
-    const mainRef = useTemplateRef('mainRef');
+    const showDialog = ref(false);
 
     function clear() {
         musicStore.audio.pause();
@@ -50,20 +52,21 @@
     }" @dragleave.prevent="isDragover = false" @dragover.prevent="isDragover = true" @drop.prevent="dropHandle"
         class="music-list">
         <header class="header">
-            <div class="menu-container">
-                <button @click="switchMenu" class="button clear-input menu">···</button>
-                <Transition name="menu">
-                    <ul v-show="showMenu" @click="switchMenu" class="list menu-list">
-                        <li @click="clear"><a href="javascript:;">清除列表</a></li>
+            <Menu>
+                <template #content>
+                    <ul class="list ">
+                        <li @click="showDialog = !showDialog"><a href="javascript:;">清除列表</a></li>
                         <li v-show="lessthen1024" @click="musicStore.addList"><a href="javascript:;">添加音频文件</a></li>
                     </ul>
-                </Transition>
-                <div @click="switchMenu" v-show="showMenu" class="modal"></div>
-            </div>
+                </template>
+                <template #button>
+                    <button @click="switchMenu" class="button clear-input menu">···</button>
+                </template>
+            </Menu>
             <input placeholder="搜 索" class="input" v-model.lazy="musicStore.keyword" type="text">
             <button @click="musicStore.keyword = ''" class="button clear-input">X</button>
         </header>
-        <main ref="mainRef">
+        <main>
             <ul class="list">
                 <li v-for="(item, index) in musicStore.filterList" :key="item.name"
                     :class="{ 'list-li-active': musicStore.currentIndex === index }" @click="playHandle(item)">
@@ -72,6 +75,9 @@
             </ul>
         </main>
     </section>
+    <Dialog v-model="showDialog" :confirm-handle="clear">
+        <template #header>您确定要清除列表吗？</template>
+    </Dialog>
 </template>
 <style scoped>
     .music-list {
@@ -80,15 +86,8 @@
         height: 100%;
         width: 100%;
         overflow-y: scroll;
-    }
-
-    .menu {
-        font-weight: bolder;
-        letter-spacing: 0.1rem;
-    }
-
-    .menu-container {
-        position: relative;
+        scrollbar-width: thin;
+        scrollbar-color: var(--pc-theme-primary) var(--pc-theme-tint-color);
     }
 
     .menu-list {
@@ -101,12 +100,9 @@
         border: 1px solid var(--pc-border-color);
     }
 
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+    .menu {
+        font-weight: bolder;
+        letter-spacing: 0.1rem;
     }
 
     .clear-input {
@@ -148,21 +144,10 @@
         background-color: var(--pc-hover-color);
     }
 
-    .menu-enter-active,
-    .menu-leave-active {
-        transform-origin: top left;
-        transition: transform 0.2s ease, opacity 0.2s ease;
-    }
-
-    .menu-enter-from,
-    .menu-leave-to {
-        opacity: 0;
-        transform: scale(0)
-    }
-
     @media screen and (max-width:1024px) {
         .music-list {
             height: 100%;
+            scrollbar-color: auto;
         }
     }
 

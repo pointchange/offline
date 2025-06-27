@@ -1,13 +1,22 @@
 <script lang="ts" setup>
     import { useMusicStore } from '@/stores/music';
-    import { getFileSuffix } from '@/utils/music';
-    import { computed, onUpdated, ref, useTemplateRef } from 'vue';
+    import { deleteFileSuffix, getFileSuffix } from '@/utils/music';
+    import { computed, onUpdated, reactive, ref, useTemplateRef } from 'vue';
+    import Tag from '../other/Tag.vue';
+    import Dialog from '../other/Dialog.vue';
+    import Menu from '../other/Menu.vue';
 
     const musicStore = useMusicStore();
     const isLyricDragover = ref(false);
     const lyricRef = useTemplateRef("lyricRef");
     const lrcHeight = ref(0);
     const showLrcMenu = ref(false);
+    const showLrc = ref(false);
+    const dialogOption = reactive({
+        show: false,
+        content: '您确定要清除列表吗？',
+        confirmHandle: () => { }
+    })
 
     const lrcLineHeight = computed(() => {
         if (musicStore.hasLrc) {
@@ -45,42 +54,73 @@
     }
 
     function clearLrc() {
-        musicStore.lrcList.clear();
+        dialogOption.show = true;
+        dialogOption.confirmHandle = () => {
+            musicStore.lrcList.clear();
+        }
     }
+    function deleteLrc(name: string) {
+        dialogOption.show = true;
+        dialogOption.content = `您确定要移除" ${name} " ？`
+        dialogOption.confirmHandle = () => {
+            musicStore.lrcList.delete(name)
+        }
+    }
+    function activeClass(text: string) {
+        const { texts } = musicStore.activeLrc;
+        return texts.some(v => v === text);
+    }
+
 </script>
 <template>
     <section :class="{
         'drag-active': isLyricDragover
     }" @dragleave.prevent="isLyricDragover = false" @dragover.prevent="isLyricDragover = true"
         @drop.prevent="dropLyricHandle" class="music-lyric">
-        <div class="menu-container lrc-menu">
-            <button @click="openLrcMenu" class="button clear-input menu">词</button>
-            <Transition name="menu">
-                <ul v-show="showLrcMenu" @click="openLrcMenu" class="list menu-list">
-                    <li @click="clearLrc"><a href="javascript:;">清除全部歌词</a></li>
-                    <li @click="musicStore.addLrcList"><a href="javascript:;">打开文件夹</a></li>
-                    <li style="display: none;" @click="musicStore.appointFile"><a href="javascript:;">打开指定的文件匹配歌曲</a>
-                    </li>
-                </ul>
-            </Transition>
-            <div @click="openLrcMenu" v-show="showLrcMenu" class="modal"></div>
-        </div>
-        <div class="lyric-box" v-show="musicStore.hasLrcListTotal">
-            <div v-active="{ name: 'lyric-active', index: musicStore.activeLrc.index, count: musicStore.activeLrc.texts }"
-                ref="lyricRef" class="lyric-container" v-show="musicStore.hasLrc" :style="{
-                    transform: `translateY(${countHeight()}px)`
-                }">
-                <p v-for="item in musicStore.lrc">{{ item.text }}</p>
-            </div>
-            <div v-show="!musicStore.hasLrc" class="df-c-c empty-lrc">
+        <header>
+            <Menu>
+                <template #content>
+                    <ul class="list ">
+                        <li @click="clearLrc"><a href="javascript:;">清除全部歌词</a></li>
+                        <li @click="musicStore.addLrcList"><a href="javascript:;">打开文件夹</a></li>
+                    </ul>
+                </template>
+                <template #button>
+                    <button @click="openLrcMenu" class="button menu">···</button>
+                </template>
+            </Menu>
+            <button v-show="musicStore.hasLrcListTotal" @click="showLrc = !showLrc" class="button">词</button>
+        </header>
+        <div class="lyric-box" v-if="musicStore.hasLrcListTotal">
+            <section v-show="showLrc && musicStore.hasLrc" ref="lyricRef" class="lyric-container" :style="{
+                transform: `translateY(${countHeight()}px)`
+            }">
+                <p v-for="item in musicStore.lrc" :class="{
+                    'lyric-active': activeClass(item.text)
+                }">{{ item.text }}</p>
+            </section>
+            <div v-show="showLrc && !musicStore.hasLrc" class="df-c-c empty-lrc">
                 <p>暂无歌词</p>
             </div>
+
+            <ul v-show="!showLrc" class="list">
+                <li @click.right.prevent="deleteLrc(value[0])" @click="musicStore.appointFile(value[0])"
+                    v-for="value in musicStore.lrcList" :key="value[0]">
+                    <a href="javascript:;">{{
+                        deleteFileSuffix(value[0]) }} </a>
+                    <Tag size="small" color="var(--pc-theme-primary)">LRC</Tag>
+                </li>
+            </ul>
+
         </div>
-        <div class="empty " v-show="!musicStore.hasLrcListTotal">
+        <div class="empty " v-else>
             <p>tip: 添加LRC文件 </p>
             <button class="button open-directory" @click="musicStore.addLrcList">打开文件夹</button>
         </div>
     </section>
+    <Dialog :confirm-handle="dialogOption.confirmHandle" v-model="dialogOption.show">
+        <template #header>{{ dialogOption.content }}</template>
+    </Dialog>
 </template>
 <style scoped>
     .music-lyric {
@@ -93,31 +133,35 @@
         overflow: hidden;
     }
 
+    header {
+        position: absolute;
+        top: 0;
+        padding: var(--pc-gap-small);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    header .button {
+        border-radius: 0.4rem;
+        padding: var(--pc-gap-small);
+    }
+
+    .list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--pc-border-color);
+    }
+
+    main {
+        padding-bottom: 1rem;
+    }
+
     .menu {
         font-weight: bolder;
         letter-spacing: 0.1rem;
-    }
-
-    .menu-container {
-        position: relative;
-    }
-
-    .menu-list {
-        margin-top: var(--pc-gap-small);
-        position: fixed;
-        z-index: 10;
-        display: grid;
-        background-color: var(--pc-theme-color);
-        box-shadow: 0 0 0.4rem var(--pc-border-color);
-        border: 1px solid var(--pc-border-color);
-    }
-
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
     }
 
     .lyric-box {
@@ -175,18 +219,6 @@
 
     .drag-active {
         opacity: 0.6;
-    }
-
-    .menu-enter-active,
-    .menu-leave-active {
-        transform-origin: top left;
-        transition: transform 0.2s ease, opacity 0.2s ease;
-    }
-
-    .menu-enter-from,
-    .menu-leave-to {
-        opacity: 0;
-        transform: scale(0)
     }
 
     @media screen and (max-width:1024px) {

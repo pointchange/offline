@@ -10,7 +10,10 @@
 <template>
     <div class="layout">
         <header>
-            <div><button @click="router.go(-1)" class="button">&lt;</button></div>
+            <div><button @click="router.go(-1)" class="button">
+                    <span></span>
+                </button>
+            </div>
             <div class="header-center">
                 <p>{{ musicStore.musicMetadata.title }}</p>
                 <p>{{ musicStore.musicMetadata.artist }}</p>
@@ -32,7 +35,6 @@
         <footer>
             <div class="footer-top">
                 <button @click="musicStore.addList" class="button">打开文件夹</button>
-
             </div>
             <div class="footer-center">
                 <Range :r="14" active-color="var(--pc-theme-primary)" slider-thumb-color="var(--pc-theme-primary)"

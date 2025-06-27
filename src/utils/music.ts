@@ -22,10 +22,11 @@ function parseLrc(contents: string) {
 
 /**
  * 
+ * @param isDark control Dark theme color
  * @returns url picture  address
  */
 
-async function getMusicCover() {
+async function getMusicCover(isDark = false) {
     const w = 500;
     const h = 500;
     let canvas: OffscreenCanvas | null = new OffscreenCanvas(w, h);
@@ -33,22 +34,22 @@ async function getMusicCover() {
     canvas.height = h;
     const ctx = canvas.getContext('2d');
     if (!ctx) return '';
-    ctx.fillStyle = '#eee';
+    ctx.fillStyle = isDark ? `rgb(50, 50, 50)` : '#eee';
     ctx.fillRect(0, 0, w, h);
     const xy = w / 2;
     const r1 = xy * 0.8;
     ctx.beginPath();
-    ctx.fillStyle = '#ccc';
+    ctx.fillStyle = isDark ? '#555' : '#ccc';
     ctx.ellipse(xy, xy, r1, r1, 0, 0, 2 * Math.PI);
     ctx.fill()
 
     const r2 = xy * 0.2;
     ctx.beginPath();
-    ctx.fillStyle = '#eee';
+    ctx.fillStyle = isDark ? `rgb(50, 50, 50)` : '#eee';
     ctx.ellipse(xy, xy, r2, r2, 0, 0, 2 * Math.PI);
     ctx.fill()
 
-    ctx.fillStyle = '#eee';
+    ctx.fillStyle = isDark ? `rgb(50, 50, 50)` : '#eee';
     const w2 = w * 0.05
     ctx.fillRect(xy + r2 - w2, 0, w2, xy);
     const blob = await canvas.convertToBlob()
@@ -113,10 +114,9 @@ function deleteFileSuffix(name: string) {
 function getFileSuffix(name: string) {
     const nameArr = name.split('.');
     const lastIndex = nameArr.length - 1;
-    console.log(lastIndex, nameArr);
     return nameArr[lastIndex];
 }
 
 export {
-    parseLrc, getMusicCover, openDirectory, deleteFileSuffix, getFileSuffix,
+    parseLrc, getMusicCover, openDirectory, deleteFileSuffix, getFileSuffix
 }

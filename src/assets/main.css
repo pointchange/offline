@@ -45,7 +45,7 @@ body {
 
 .button {
     padding: var(--pc-gap-medium);
-    border-radius: var(--pc-gap);
+    border-radius: var(--pc-gap-small);
 }
 
 .button:hover {

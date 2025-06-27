@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-    import { computed, ref, useTemplateRef } from 'vue';
+    import { ref, useTemplateRef } from 'vue';
     const model = defineModel<number>()
     interface Slider {
         min?: number,

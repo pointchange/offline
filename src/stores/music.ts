@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { parseWebStream } from 'music-metadata';
 import { deleteFileSuffix, getMusicCover, openDirectory, parseLrc } from '@/utils/music';
+import { useSettingStore } from './setting';
 
 enum PlayMode {
     Order,
@@ -18,7 +19,7 @@ enum PlayModeString {
 
 interface ActiveLrc {
     index: number,
-    texts: number
+    texts: string[]
 }
 export const useMusicStore = defineStore('music', {
     state: () => ({
@@ -52,7 +53,10 @@ export const useMusicStore = defineStore('music', {
         isPlaying: false,
         recordPreVolumn: 1,
         oldUrl: '',
-        cover: '',
+        imageURL: {
+            musiclightCover: '',
+            musicDarkCover: '',
+        },
 
         lrc: [] as LRC[],
         lrcList: new Map<string, F>(),
@@ -60,7 +64,7 @@ export const useMusicStore = defineStore('music', {
         lrcIndex: 0,
         activeLrc: {
             index: 0,
-            texts: 0,
+            texts: [],
         } as ActiveLrc,
         userSelect: false
     }),
@@ -95,7 +99,9 @@ export const useMusicStore = defineStore('music', {
             }
         },
         getImageURL(state) {
-            return state.musicMetadata.pic ? state.pictureUrl : state.cover;
+            const settingStore = useSettingStore();
+            const { musicDarkCover, musiclightCover } = state.imageURL;
+            return state.musicMetadata.pic ? state.pictureUrl : (settingStore.isDarktheme ? musicDarkCover : musiclightCover);
         },
         getLrcListTotal(state) {
             return state.lrcList.size;
@@ -112,7 +118,7 @@ export const useMusicStore = defineStore('music', {
     },
 
     actions: {
-        async init() {
+        init() {
             this.audio.onended = this.endedHandle;
             this.audio.ontimeupdate = (e: Event) => {
                 const audio = e.target as HTMLAudioElement;
@@ -120,16 +126,16 @@ export const useMusicStore = defineStore('music', {
                 this.music.currentTime = t;
 
                 if (this.lrc.length === 0) return;
-                this.activeLrc.texts = 0;
+                this.activeLrc.texts = [];
                 let i = this.lrc.findIndex(v => v.time >= t);
                 let index = i - 1;
                 if (index < 0) return;
                 this.activeLrc.index = index;
-                this.activeLrc.texts++;
+                this.activeLrc.texts.push(this.lrc[index].text);
 
                 let nextI = i + 1;
                 while (nextI < this.getLrcTotal && this.lrc[i].time === this.lrc[nextI].time) {
-                    this.activeLrc.texts++
+                    this.activeLrc.texts.push(this.lrc[nextI - 1].text);
                     nextI++;
                 }
             }
@@ -144,7 +150,12 @@ export const useMusicStore = defineStore('music', {
             this.audio.onerror = (e) => {
                 // console.log(e);
             }
-            this.cover = await getMusicCover();
+            getMusicCover().then(v => {
+                this.imageURL.musiclightCover = v;
+            })
+            getMusicCover(true).then(v => {
+                this.imageURL.musicDarkCover = v;
+            })
         },
         destory() {
             this.audio.onended = null;
@@ -196,15 +207,17 @@ export const useMusicStore = defineStore('music', {
             if (this.userSelect) return;
             const soneName1 = this.musicMetadata.title;
             const soneName2 = deleteFileSuffix(name);
-            const reg1 = new RegExp(soneName1, 'ig');
-            const reg2 = new RegExp(soneName2, 'ig');
+            const reg1 = new RegExp(soneName1.replaceAll(' ', ''), 'ig');
+            const reg2 = new RegExp(soneName2.replaceAll(' ', ''), 'ig');
             let lrcItem: F | any = undefined;
             this.lrcList.forEach((value, key) => {
-                if ((soneName1 !== '' && reg1.test(key)) || (soneName2 !== '' && reg2.test(key))) {
+                const k = key.replaceAll(' ', '');
+                const bool1 = soneName1 !== '' && reg1.test(k)
+                const bool2 = soneName2 !== '' && reg2.test(k)
+                if (bool1 || bool2) {
                     lrcItem = value;
                 }
             })
-
             // let lrcItem = this.lrcList.keys().find(v => (soneName1 !== '' && reg1.test(v.name)) ||
             //     (soneName2 !== '' && reg2.test(v.name))
             // );
@@ -381,8 +394,22 @@ export const useMusicStore = defineStore('music', {
             if (directory.length === 0) return;
             this.lrcList = this.addLrc(this.lrcList, directory);
         },
-        async appointFile() {
-
+        async appointFile(filename: string) {
+            this.userSelect = true;
+            const lrcItem = this.lrcList.get(filename);
+            if (!lrcItem) return;
+            if (lrcItem instanceof FileSystemFileHandle) {
+                const lrcFile = await lrcItem.getFile();
+                const contents = await lrcFile.text();
+                this.lrc = parseLrc(contents);
+            }
+            if (lrcItem instanceof File) {
+                const reader = new FileReader();
+                reader.readAsText(lrcItem);
+                reader.onload = () => {
+                    this.lrc = parseLrc(reader.result as string)
+                }
+            }
         }
     },
 })

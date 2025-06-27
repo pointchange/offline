@@ -157,9 +157,6 @@
         letter-spacing: 0.1rem;
     }
 
-    main {
-        padding-bottom: 1rem;
-    }
 
     .muted-volumn {
         opacity: 0.6;
