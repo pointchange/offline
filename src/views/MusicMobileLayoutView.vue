@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+    import LryricBox from '@/components/music/LryricBox.vue';
     import Range from '@/components/other/Range.vue';
     import { useMusicStore } from '@/stores/music';
     import { ref } from 'vue';
@@ -6,35 +7,34 @@
     const router = useRouter();
     const musicStore = useMusicStore();
     const switchImgLyric = ref(false);
+
 </script>
 <template>
     <div class="layout">
         <header>
-            <div><button @click="router.go(-1)" class="button">
-                    <span></span>
+            <div><button @click="router.go(-1)" class="button preView">
+                    &lt;
                 </button>
             </div>
             <div class="header-center">
                 <p>{{ musicStore.musicMetadata.title }}</p>
                 <p>{{ musicStore.musicMetadata.artist }}</p>
             </div>
-            <div><button class="button">分享 </button></div>
         </header>
-        <main @click="">
+        <main @click="switchImgLyric = !switchImgLyric">
             <section v-show="!switchImgLyric" class="img">
                 <img :src="musicStore.getImageURL" :alt="musicStore.musicMetadata.artist">
             </section>
             <section v-show="switchImgLyric" class="music-lyric">
-                <div v-if="musicStore.lrc"></div>
-                <div v-else class="empty df-c-c">
-
-                    暂无歌词
-                </div>
+                <LryricBox />
             </section>
         </main>
         <footer>
             <div class="footer-top">
                 <button @click="musicStore.addList" class="button">打开文件夹</button>
+                <button @click="musicStore.addList" class="button">
+                    <RouterLink to="/music">词</RouterLink>
+                </button>
             </div>
             <div class="footer-center">
                 <Range :r="14" active-color="var(--pc-theme-primary)" slider-thumb-color="var(--pc-theme-primary)"
@@ -61,7 +61,9 @@
                     <button @click="musicStore.endedHandle" class="button">下一首</button>
                 </div>
                 <div>
-                    <button @click="" class="button">列表</button>
+                    <button class="button">
+                        <RouterLink to="/music">列表</RouterLink>
+                    </button>
                 </div>
             </div>
         </footer>
@@ -72,12 +74,13 @@
         padding: var(--pc-gap-normal);
         display: flex;
         flex-direction: column;
+        width: 100%;
         height: 100%;
     }
 
     header {
-        display: flex;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
         align-items: center;
     }
 
@@ -90,11 +93,23 @@
         color: var(--pc-theme-fs-tint-color)
     }
 
+    .preView {
+        padding: 0.1rem 0.6rem;
+        font-size: 1.6rem;
+    }
+
+    .music-lyric {
+        width: 100%;
+        height: 100%;
+    }
+
     main {
+        position: relative;
         flex: 1;
         display: flex;
         justify-content: center;
         align-items: center;
+        overflow: hidden;
     }
 
     main .img {
@@ -113,6 +128,12 @@
         display: flex;
         flex-direction: column;
         gap: var(--pc-gap-normal)
+    }
+
+    .footer-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     .footer-center .time {

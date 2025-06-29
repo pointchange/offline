@@ -23,7 +23,7 @@
     function playHandle(file: F) {
         musicStore.playHandle(file);
         if (props.lessthen1024) {
-            router.push('/music/musicLayoutView');
+            router.push('/music/musicMobileLayoutView');
         }
     }
     function dropHandle(ev: DragEvent) {

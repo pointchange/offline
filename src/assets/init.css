@@ -68,7 +68,7 @@ li {
 button {
     outline: none;
     border: none;
-    background-color: var(--pc-theme-color);
+    background-color: transparent;
     color: var(--pc-theme-fs-color);
     outline: 1px solid var(--pc-border-color);
 }

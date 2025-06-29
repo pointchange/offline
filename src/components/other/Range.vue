@@ -15,7 +15,8 @@
         tooltipBorderColor?: string,
         value?: number,
         format?: (v: string | number) => string | number,
-        alwayShowTooltip?: boolean
+        alwayShowTooltip?: boolean,
+
     }
     type Keyword = 'change' | 'input'
     const emit = defineEmits<{
@@ -83,8 +84,10 @@
         if (recordX) {
             sliderThumbX.value = recordX;
         }
-        const moveHandle = (e: MouseEvent) => {
-            const { clientX } = e;
+        const moveHandle = (e: MouseEvent | TouchEvent) => {
+            let clientX = e instanceof MouseEvent ? e.clientX : e.changedTouches[0].clientX;
+            // const { clientX } = e;
+
             if (!lineRef.value) return;
             const line = lineRef.value.getBoundingClientRect();
             if (typeof step !== 'number') {
@@ -114,12 +117,16 @@
             recordX = sliderThumbX.value;
             document.removeEventListener('mousemove', moveHandle)
             document.removeEventListener('mouseup', upHandle);
+            document.removeEventListener('touchmove', moveHandle);
+            document.removeEventListener('touchend', upHandle);
             showTooltip.value = false;
             isAuto.value = true;
             isTransition.value = true;
         }
         document.addEventListener('mousemove', moveHandle);
         document.addEventListener('mouseup', upHandle);
+        document.addEventListener('touchmove', moveHandle);
+        document.addEventListener('touchend', upHandle);
     }
 
     function clickHandle(e: MouseEvent) {
@@ -158,10 +165,10 @@
     }">
         <div :class="{
             'active-transition': isTransition
-        }" @dragstart.prevent="" @mousedown="downHandle" class="slider-thumb" :style="{
-            transform: `translateX(${isAuto ? move() : sliderThumbX}px)`,
-        }">
-            <!-- :class="{ 'active-tooltip': alwayShowTooltip || showTooltip }" -->
+        }" @dragstart.prevent.passive="" @touchstart.passive="downHandle" @mousedown="downHandle" class="slider-thumb"
+            :style="{
+                transform: `translateX(${isAuto ? move() : sliderThumbX}px)`,
+            }">
             <div v-show="alwayShowTooltip || showTooltip" class="tooltip">{{ fotmatTooltip() }}
             </div>
         </div>

@@ -19,9 +19,9 @@ const routes = [
                 component: () => import('../views/MusicView.vue'),
             },
             {
-                path: 'musicLayoutView',
+                path: 'musicMobileLayoutView',
                 name: 'MusicLayoutView',
-                component: () => import('../views/MusicLayoutView.vue'),
+                component: () => import('../views/MusicMobileLayoutView.vue'),
             },
         ],
     },

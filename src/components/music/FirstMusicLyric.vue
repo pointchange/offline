@@ -1,15 +1,14 @@
 <script lang="ts" setup>
     import { useMusicStore } from '@/stores/music';
     import { deleteFileSuffix, getFileSuffix } from '@/utils/music';
-    import { computed, onUpdated, reactive, ref, useTemplateRef } from 'vue';
+    import {  reactive, ref } from 'vue';
     import Tag from '../other/Tag.vue';
     import Dialog from '../other/Dialog.vue';
     import Menu from '../other/Menu.vue';
+    import LryricBox from './LryricBox.vue';
 
     const musicStore = useMusicStore();
     const isLyricDragover = ref(false);
-    const lyricRef = useTemplateRef("lyricRef");
-    const lrcHeight = ref(0);
     const showLrcMenu = ref(false);
     const showLrc = ref(false);
     const dialogOption = reactive({
@@ -18,13 +17,7 @@
         confirmHandle: () => { }
     })
 
-    const lrcLineHeight = computed(() => {
-        if (musicStore.hasLrc) {
-            return lrcHeight.value / musicStore.getLrcTotal;
-        } else {
-            return 0;
-        }
-    });
+
     function dropLyricHandle(ev: DragEvent) {
         if (!ev.dataTransfer) return;
         const files = ev.dataTransfer.items;
@@ -37,17 +30,6 @@
         }
         musicStore.lrcList = musicStore.addLrc(musicStore.lrcList, lrcArr);
         isLyricDragover.value = false;
-    }
-    onUpdated(() => {
-        if (musicStore.hasLrc) {
-            if (!lyricRef.value) return;
-            lrcHeight.value = lyricRef.value.getBoundingClientRect().height;
-        }
-    })
-    function countHeight() {
-        if (!musicStore.hasLrc) return 0;
-        const { index } = musicStore.activeLrc;
-        return -lrcLineHeight.value * index - lrcLineHeight.value / 2;
     }
     function openLrcMenu() {
         showLrcMenu.value = !showLrcMenu.value;
@@ -66,11 +48,14 @@
             musicStore.lrcList.delete(name)
         }
     }
-    function activeClass(text: string) {
-        const { texts } = musicStore.activeLrc;
-        return texts.some(v => v === text);
-    }
 
+    function switchShowLrc() {
+        showLrc.value = !showLrc.value;
+    }
+    function lrcItemClickHandle(name: string) {
+        musicStore.appointFile(name);
+        switchShowLrc()
+    }
 </script>
 <template>
     <section :class="{
@@ -89,22 +74,13 @@
                     <button @click="openLrcMenu" class="button menu">···</button>
                 </template>
             </Menu>
-            <button v-show="musicStore.hasLrcListTotal" @click="showLrc = !showLrc" class="button">词</button>
+            <button v-show="musicStore.hasLrcListTotal" @click="switchShowLrc" class="button">词</button>
         </header>
         <div class="lyric-box" v-if="musicStore.hasLrcListTotal">
-            <section v-show="showLrc && musicStore.hasLrc" ref="lyricRef" class="lyric-container" :style="{
-                transform: `translateY(${countHeight()}px)`
-            }">
-                <p v-for="item in musicStore.lrc" :class="{
-                    'lyric-active': activeClass(item.text)
-                }">{{ item.text }}</p>
-            </section>
-            <div v-show="showLrc && !musicStore.hasLrc" class="df-c-c empty-lrc">
-                <p>暂无歌词</p>
-            </div>
+            <LryricBox v-show="showLrc"></LryricBox>
 
             <ul v-show="!showLrc" class="list">
-                <li @click.right.prevent="deleteLrc(value[0])" @click="musicStore.appointFile(value[0])"
+                <li @click.right.prevent="deleteLrc(value[0])" @click="lrcItemClickHandle(value[0])"
                     v-for="value in musicStore.lrcList" :key="value[0]">
                     <a href="javascript:;">{{
                         deleteFileSuffix(value[0]) }} </a>
@@ -168,24 +144,6 @@
         position: relative;
         width: 100%;
         height: 100%;
-    }
-
-    .lyric-container {
-        position: absolute;
-        top: 48%;
-        width: 100%;
-        color: var(--pc-theme-fs-tint-color);
-        transition: transform 0.8s ease, opacity 0.8s ease;
-    }
-
-    .lyric-container p {
-        text-align: center;
-    }
-
-    .lyric-active {
-        opacity: 1;
-        font-weight: 900;
-        color: var(--pc-theme-primary);
     }
 
     .empty {

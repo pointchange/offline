@@ -204,7 +204,10 @@ export const useMusicStore = defineStore('music', {
             this.oldIndex = this.currentIndex;
             this.currentIndex = this.list.findIndex(v => v.name === name);
 
-            if (this.userSelect) return;
+            if (this.userSelect) {
+                this.userSelect = false;
+                return;
+            }
             const soneName1 = this.musicMetadata.title;
             const soneName2 = deleteFileSuffix(name);
             const reg1 = new RegExp(soneName1.replaceAll(' ', ''), 'ig');
@@ -397,6 +400,7 @@ export const useMusicStore = defineStore('music', {
         async appointFile(filename: string) {
             this.userSelect = true;
             const lrcItem = this.lrcList.get(filename);
+
             if (!lrcItem) return;
             if (lrcItem instanceof FileSystemFileHandle) {
                 const lrcFile = await lrcItem.getFile();
