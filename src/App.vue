@@ -4,6 +4,8 @@
   import Nav from './components/Nav.vue';
   import { useSettingStore } from './stores/setting';
   import { useMusicStore } from './stores/music';
+  // import Message from './components/other/Message.vue';
+  import { useMessageStore } from './stores/message';
   const setting = useSettingStore();
   // function keepAliveHandle() {
   //   return settingStore.musicSetting.destoryComponent ? '' : 'MusicView'
@@ -13,6 +15,7 @@
     musicStore.init();
     setting.init();
   })
+  const messageStore = useMessageStore();
 </script>
 <template>
   <div class="home ">
@@ -32,8 +35,20 @@
       </article>
     </main>
   </div>
+  <!-- <Teleport to="body">
+    <div class="msg">
+      <Message />
+    </div>
+  </Teleport> -->
 </template>
 <style scoped>
+  .msg {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
   .home {
     height: 100%;
     overflow: hidden;

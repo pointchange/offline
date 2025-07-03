@@ -5,6 +5,7 @@
     import { deleteFileSuffix } from '@/utils/music';
     import Dialog from '../other/Dialog.vue';
     import Menu from '../other/Menu.vue';
+    import { dropAudio } from '@/utils/drop';
 
     const props = defineProps(['lessthen1024']);
     const musicStore = useMusicStore();
@@ -27,19 +28,22 @@
         }
     }
     function dropHandle(ev: DragEvent) {
-        if (!ev.dataTransfer) return;
-        const files = ev.dataTransfer.items;
-        const reg = new RegExp('audio', 'ig');
-        const filesArr: File[] = [];
-        for (let i = 0; i < files.length; i++) {
-            if (files[i].kind === "file" && reg.test(files[i].type)) {
-                const file = files[i].getAsFile();
-                if (!file) return;
-                filesArr.push(file)
-            }
+        // if (!ev.dataTransfer) return;
+        // const files = ev.dataTransfer.items;
+        // const reg = new RegExp('audio', 'ig');
+        // const filesArr: File[] = [];
+        // for (let i = 0; i < files.length; i++) {
+        //     if (files[i].kind === "file" && reg.test(files[i].type)) {
+        //         const file = files[i].getAsFile();
+        //         if (!file) return;
+        //         filesArr.push(file)
+        //     }
+        // }
+        const filesArr = dropAudio(ev);
+        if (filesArr) {
+            musicStore.list = musicStore.add(filesArr, musicStore.list);
+            isDragover.value = false;
         }
-        musicStore.list = musicStore.add(filesArr, musicStore.list);
-        isDragover.value = false;
     }
     function switchMenu() {
         showMenu.value = !showMenu.value
@@ -63,7 +67,8 @@
                     <button @click="switchMenu" class="button clear-input menu">···</button>
                 </template>
             </Menu>
-            <input placeholder="搜 索" class="input" v-model.lazy="musicStore.keyword" type="text">
+            <input :placeholder="`搜 索 ${musicStore.total} 首`" class="input" v-model.lazy="musicStore.keyword"
+                type="text">
             <button @click="musicStore.keyword = ''" class="button clear-input">X</button>
         </header>
         <main>
@@ -142,6 +147,10 @@
 
     .list-li-active {
         background-color: var(--pc-hover-color);
+    }
+
+    .drag-active {
+        opacity: 0.6;
     }
 
     @media screen and (max-width:1024px) {

@@ -31,8 +31,8 @@
             <div class="img">
                 <img :src="musicStore.getImageURL" :alt="musicStore.musicMetadata.artist">
             </div>
-            <p>{{ musicStore.musicMetadata.title }}</p>
-            <p>{{ musicStore.musicMetadata.artist }}</p>
+            <p class="title">{{ musicStore.musicMetadata.title }}</p>
+            <p class="artist">{{ musicStore.musicMetadata.artist }}</p>
         </section>
         <footer class="music-bottom">
             <!-- <Music /> -->
@@ -155,8 +155,13 @@
 
     .music-singer p {
         letter-spacing: 0.1rem;
+        font-weight: 100;
     }
 
+    .music-singer .title {
+        margin: var(--pc-gap-small);
+        font-size: 2rem;
+    }
 
     .muted-volumn {
         opacity: 0.6;

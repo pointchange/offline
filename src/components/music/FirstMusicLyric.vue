@@ -1,7 +1,7 @@
 <script lang="ts" setup>
     import { useMusicStore } from '@/stores/music';
     import { deleteFileSuffix, getFileSuffix } from '@/utils/music';
-    import {  reactive, ref } from 'vue';
+    import { computed, reactive, ref } from 'vue';
     import Tag from '../other/Tag.vue';
     import Dialog from '../other/Dialog.vue';
     import Menu from '../other/Menu.vue';
@@ -16,6 +16,14 @@
         content: '您确定要清除列表吗？',
         confirmHandle: () => { }
     })
+    const accept = computed(() => musicStore.lrcEncode.map(v => '.' + v).join(','))
+    function changeHandle(e: Event) {
+        const input = e.target as HTMLInputElement;
+        const files = input.files;
+        if (files && files.length > 0) {
+            musicStore.lrcList = musicStore.addLrc([...files], musicStore.lrcList);
+        }
+    }
 
 
     function dropLyricHandle(ev: DragEvent) {
@@ -28,7 +36,7 @@
                 lrcArr.push(f);
             }
         }
-        musicStore.lrcList = musicStore.addLrc(musicStore.lrcList, lrcArr);
+        musicStore.lrcList = musicStore.addLrc(lrcArr, musicStore.lrcList);
         isLyricDragover.value = false;
     }
     function openLrcMenu() {
@@ -87,11 +95,14 @@
                     <Tag size="small" color="var(--pc-theme-primary)">LRC</Tag>
                 </li>
             </ul>
-
         </div>
         <div class="empty " v-else>
             <p>tip: 添加LRC文件 </p>
-            <button class="button open-directory" @click="musicStore.addLrcList">打开文件夹</button>
+            <button class="button" @click="musicStore.addLrcList">打开文件夹</button>
+            <label class="button">
+                <input @change="changeHandle" multiple type="file" :accept="accept" />
+                打开LRC文件
+            </label>
         </div>
     </section>
     <Dialog :confirm-handle="dialogOption.confirmHandle" v-model="dialogOption.show">
@@ -99,6 +110,10 @@
     </Dialog>
 </template>
 <style scoped>
+    [type="file"] {
+        display: none;
+    }
+
     .music-lyric {
         padding: var(--pc-gap-large);
         position: relative;
@@ -147,16 +162,19 @@
     }
 
     .empty {
+        display: flex;
         flex-direction: column;
+        gap: var(--pc-gap-normal);
     }
 
     .empty p {
-        opacity: 0.8;
+        color: var(--pc-theme-fs-tint-color);
     }
 
-    .empty .open-directory {
+    .empty .button {
         font-size: 1.2rem;
         border-radius: var(--pc-gap-small);
+        outline: 1px solid var(--pc-border-color);
     }
 
     .empty-lrc {

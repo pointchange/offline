@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { parseWebStream } from 'music-metadata';
 import { deleteFileSuffix, getMusicCover, openDirectory, parseLrc } from '@/utils/music';
 import { useSettingStore } from './setting';
+import { message } from '@/utils/msg';
 
 enum PlayMode {
     Order,
@@ -16,11 +17,6 @@ enum PlayModeString {
     Reversed = '反转'
 }
 
-
-interface ActiveLrc {
-    index: number,
-    texts: string[]
-}
 export const useMusicStore = defineStore('music', {
     state: () => ({
         audio: new Audio(),
@@ -66,7 +62,8 @@ export const useMusicStore = defineStore('music', {
             index: 0,
             texts: [],
         } as ActiveLrc,
-        userSelect: false
+        userSelect: false,
+        userSelectTime: 0,
     }),
     getters: {
         filterList(state) {
@@ -286,10 +283,22 @@ export const useMusicStore = defineStore('music', {
         },
         async addList() {
             const list = await openDirectory(this.encode);
-            const len = list.length;
-            if (len > 0) {
-                this.list = this.add(list, this.list);
-                this.currentIndex += len;
+            if (list.length === 0) {
+                message().add({
+                    type: 'warn',
+                    text: '没有发现音频文件'
+                })
+                return;
+            }
+            const arr = this.add(list, this.list);
+            if (arr.length !== this.list.length) {
+                this.list = arr;
+                this.currentIndex += arr.length;
+            } else {
+                message().add({
+                    type: 'warn',
+                    text: '没有发现新音频文件，或许列表里有'
+                })
             }
         },
         setRandom() {
@@ -376,7 +385,7 @@ export const useMusicStore = defineStore('music', {
                 this.music.volumn = this.recordPreVolumn;
             }
         },
-        addLrc(list: Map<string, F>, array: F[]) {
+        addLrc(array: F[], list: Map<string, F>) {
             let m = new Map<string, F>();
             if (list.size !== 0) {
                 list.forEach((value, key) => {
@@ -394,8 +403,14 @@ export const useMusicStore = defineStore('music', {
         },
         async addLrcList() {
             const directory = await openDirectory(this.lrcEncode);
-            if (directory.length === 0) return;
-            this.lrcList = this.addLrc(this.lrcList, directory);
+            if (directory.length === 0) {
+                message().add({
+                    type: 'warn',
+                    text: '没有发现LRC文件'
+                })
+                return;
+            }
+            this.lrcList = this.addLrc(directory, this.lrcList);
         },
         async appointFile(filename: string) {
             this.userSelect = true;

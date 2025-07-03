@@ -3,7 +3,7 @@
     --pc-rgb: 72, 61, 139;
     /* --pc-rgb: 0, 128, 0; */
     --pc-primary-color: rgba(72, 61, 139, 1);
-    --pc-success-color: rgba(34, 139, 34, 1);
+    /* --pc-success-color: rgba(34, 139, 34, 1); */
     --pc-error-color: rgba(220, 20, 60, 1);
     --pc-info-color: rgba(255, 140, 0, 1);
     /* --pc-info-color: rgba(128, 0, 128, 1); rgb(255, 140, 0) #ff8c00*/
@@ -27,6 +27,11 @@
 }
 
 .light {
+    --pc-success-color: rgb(215, 255, 215);
+    --pc-warn-color: rgb(255, 234, 208);
+    --pc-error-color: rgb(255, 234, 238);
+
+
     --pc-theme-color: #fff;
     --pc-theme-fs-color: #000;
     --pc-theme-fs-tint-color: #888;
@@ -39,16 +44,19 @@
 }
 
 .dark {
+    --pc-success-color: rgb(10, 60, 10);
     --pc-theme-color: rgb(24, 24, 24);
     --pc-theme-fs-color: rgb(234, 234, 234);
     --pc-theme-fs-tint-color: #999;
     --pc-border-color: rgb(50, 50, 50);
-    /*42, 38, 68*/
     --pc-theme-tint-color: #555;
     --pc-theme-primary: rgba(var(--pc-rgb), 1);
     --pc-hover-color: rgba(var(--pc-rgb), 0.6);
-    /* --pc-input-color: rgba(var(--pc-rgb), 0.4);
-    --pc-input-hover-color: #fff; */
+
+    --pc-success-color: rgb(28, 34, 28);
+    --pc-warn-color: rgb(60, 36, 6);
+    /* --pc-error-color: rgb(60, 4, 16); */
+    --pc-error-color: rgb(32, 3, 9);
 }
 
 * {

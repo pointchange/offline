@@ -81,7 +81,10 @@ async function openDirectory(encode: string[]) {
         }
         return songFiles
 
-    } catch (error) { return songFiles }
+    } catch (error) {
+        console.log(error);
+        return songFiles
+    }
 }
 // function randomColor(n: number) {
 //     function randomNumber() {
