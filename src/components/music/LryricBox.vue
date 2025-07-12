@@ -62,26 +62,26 @@
     }
 </script>
 <template>
-    <div class="lyric" @mousedown.prevent="mousedownHandler">
-        <section :class="{
-            'lyric-container-animate': isStopScroll
-        }" v-show="musicStore.hasLrc" ref="lyricRef" class="lyric-container" :style="{
-            transform: `translateY(${countHeight()}px)`
-        }">
-            <p v-for="(item, index) in musicStore.lrc" :class="{
-                'lyric-active': activeClass(item.text, index)
-            }">{{ item.text }}</p>
-        </section>
-        <div v-show="!musicStore.hasLrc" class="df-c-c empty-lrc">
-            <p>暂无歌词</p>
-        </div>
-        <Teleport to=".music-lyric">
-            <div v-show="musicStore.hasLrc && isStopScroll" class="middle-line" :style="{ height: lineHeight + 'px' }">
-                <button @click="play" class="button">开始</button>
-                <div></div>
-                <span>{{ moveTime }}</span>
+    <div class="music-lyric">
+        <div class="lyric" @mousedown.prevent="mousedownHandler">
+            <section :class="{
+                'lyric-container-animate': isStopScroll
+            }" v-show="musicStore.hasLrc" ref="lyricRef" class="lyric-container" :style="{
+                transform: `translateY(${countHeight()}px)`
+            }">
+                <p v-for="(item, index) in musicStore.lrc" :class="{
+                    'lyric-active': activeClass(item.text, index)
+                }">{{ item.text }}</p>
+            </section>
+            <div v-show="!musicStore.hasLrc" class="df-c-c empty-lrc">
+                <p>暂无歌词</p>
             </div>
-        </Teleport>
+        </div>
+        <div v-show="musicStore.hasLrc && isStopScroll" class="middle-line" :style="{ height: lineHeight + 'px' }">
+            <button @click="play" class="button">开始</button>
+            <div></div>
+            <span>{{ moveTime }}</span>
+        </div>
     </div>
 </template>
 <style scoped>

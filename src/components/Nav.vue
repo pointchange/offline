@@ -18,6 +18,9 @@
                         <RouterLink activeClass="a-active" to="/music">音乐</RouterLink>
                     </li>
                     <li>
+                        <RouterLink activeClass="a-active" to="/analyse">分析</RouterLink>
+                    </li>
+                    <li>
                         <RouterLink activeClass="a-active" to="/setting">设置</RouterLink>
                     </li>
                 </ul>
